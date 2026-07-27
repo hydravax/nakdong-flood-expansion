@@ -98,9 +98,9 @@ def get_high_res_tiff(m, dpi=(600, 600), bounds=None, zoom=None):
     try:
         driver = webdriver.Chrome(options=options)
         driver.get("file://" + tmp_path)
-        time.sleep(2)  # Leaflet 초기화 대기
+        time.sleep(2)  # Wait for Leaflet initialization
         driver.execute_script(set_view_js)
-        time.sleep(4)  # 타일·마커 로딩 대기
+        time.sleep(4)  # Wait for tiles and markers to load
         png_data = driver.get_screenshot_as_png()
         driver.quit()
 
@@ -110,7 +110,7 @@ def get_high_res_tiff(m, dpi=(600, 600), bounds=None, zoom=None):
         return out.getvalue()
     except Exception as e:
         import streamlit as st
-        st.error(f"지도 저장 오류: {e}")
+        st.error(f"Map save error: {e}")
         return None
     finally:
         if os.path.exists(tmp_path):
@@ -134,19 +134,19 @@ def load_optimization_data():
                         is_opt = (str(k1) != str(k2)) or (str(t1) != str(t2))
                         opt_dict[str(r['bas_code']).strip()] = is_opt
         except Exception as e:
-            st.error(f"최적화 결과 로드 오류: {e}")
+            st.error(f"Optimization results load error: {e}")
     return opt_dict
 
 @st.cache_data
 def load_performance_data():
     f_list = [x for x in glob.glob(os.path.join(CURRENT_DIR, '*04.xlsx')) if not os.path.basename(x).startswith('~')]
     perf_dict = {}
-    reason_dict = {}  # 불가 사유 (Note 콼럼)
+    reason_dict = {}  # Disqualified reason (Note column)
     if f_list:
         try:
             df = pd.read_excel(f_list[0], sheet_name=1, header=2, dtype=str)
             cols = df.columns.tolist()
-            # 콼럼명이 깨져 있으니 위치 인덱스로 접근 지점=2, 종합판정=3, Note=-1
+            # Use positional index due to corrupted column names (node=2, eval=3, note=-1)
             for _, r in df.iterrows():
                 name = r.iloc[2] if len(r) > 2 else None
                 cat  = r.iloc[3] if len(r) > 3 else None
@@ -156,7 +156,7 @@ def load_performance_data():
                 if pd.notna(name) and pd.notna(note) and str(note).strip() not in ('nan', ''):
                     reason_dict[str(name).strip()] = str(note).strip()
         except Exception as e:
-            st.error(f"성능비교 결과 로드 오류: {e}")
+            st.error(f"Performance comparison load error: {e}")
     return perf_dict, reason_dict
 
 st.set_page_config(layout="wide", page_title="낙동강유역 시각화 시스템", page_icon="🌊")
@@ -189,12 +189,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if st.button("낙동강유역 홍수특보지점 검토", help="클릭하면 모든 선택이 초기화되고 처음 화면으로 돌아갑니다."):
+if st.button("낙동강유역 홍수Special Node 검토", help="Click to reset all selections and return to home."):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
 
-st.markdown("수계 특성을 고려한 홍수예보 체계 마련 및 홍수특보 확대 대상 하천 검토")
+st.markdown("수계 특성을 고려한 홍수예보 체계 마련 및 홍수Special 확대 대상 하천 검토")
 
 DATA_DIR = os.path.join(CURRENT_DIR, "input")
 WS_COLORS = {
@@ -244,7 +244,7 @@ def load_all_data():
             b["watershed"] = ws
             gdf_basins_list.append(b)
 
-        for tag, ptype in [("특보지점", "특보"), ("유역출구", "유역출구")]:
+        for tag, ptype in [("Special Node", "Special"), ("유역출구", "유역출구")]:
             flist = glob.glob(os.path.join(GIS_DIR, f"*_{ws}_{tag}.geojson"))
             if flist:
                 p = gpd.read_file(flist[0])
@@ -253,7 +253,7 @@ def load_all_data():
                 p = p.to_crs(epsg=4326)
                 p["pt_type"] = ptype
                 p["watershed"] = ws
-                if ptype == "특보":
+                if ptype == "Special":
                     for _, row in p.iterrows():
                         special_nodes.add(row["desc"])
                 gdf_pts_list.append(p)
@@ -387,7 +387,7 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         elif cat == "변화없음": cat_emoji = "🟣"
         elif cat.startswith("불가"): cat_emoji = "🔴"
         
-        sp_str = "🔴특보" if is_sp else "⚫일반"
+        sp_str = "🔴Special" if is_sp else "⚫일반"
         
         if map_mode == "매개변수 최적화 수행결과":
             main_info = opt_str
@@ -400,7 +400,7 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
             other_info = f"{opt_str} | {cat_emoji}{cat}"
             
         display_label = f"{lbl}\n{main_info}\n──────\n{other_info}"
-        tooltip_text = f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}\n매개변수: {'최적화 수행' if is_opt else '기본값 유지'}\n성능비교: {cat}"
+        tooltip_text = f"지점명: {lbl}\n구분: {'Special Node' if is_sp else '일반지점'}\n매개변수: {'최적화 수행' if is_opt else '기본값 유지'}\n성능비교: {cat}"
         
         if map_mode == "매개변수 최적화 수행결과":
             if is_opt:
@@ -460,13 +460,13 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         return f"<p>오류: {e}</p>"
 
 
-# ── 데이터 로드 ──
+# ── Load Data ──
 upstream_map, node_metadata, gdf_all_basins, gdf_all_pts, special_nodes = load_all_data()
 river_layers = load_rivers()
 opt_dict = load_optimization_data()
 perf_dict, reason_dict = load_performance_data()
 
-# ── 세션 초기화 ──
+# ── Initialize Session ──
 for _k, _v in [
     ("sp_box_key", "선택 없음"), ("out_box_key", "선택 없음"),
     ("search_query", ""), ("map_clicked_node", None),
@@ -485,7 +485,7 @@ if st.session_state.get("_reset_widgets"):
 col_side, col_map, col_graph = st.columns([1, 2.5, 1.5])
 
 # ══════════════════════════════════════════
-#  사이드바: 설정 및 지점 선택
+#  Sidebar: Settings and Node Selection
 # ══════════════════════════════════════════
 with col_side:
     st.subheader("설정")
@@ -512,14 +512,14 @@ with col_side:
         for _, row in disp_pts.drop_duplicates(subset=["desc"]).iterrows():
             pfx = f"[{row['watershed']}] " if selected_ws == "전체" else ""
             lbl = f"{pfx}{row['Name']} ({row['desc']})"
-            if row["pt_type"] == "특보":
+            if row["pt_type"] == "Special":
                 sp_opts.append(lbl)
             elif row["pt_type"] == "유역출구":
                 out_opts.append(lbl)
         sp_opts.sort()
         out_opts.sort()
 
-    # on_change 콜백: 드롭다운/검색 사용 시 지도 클릭 초기화
+    # Reset map click when using dropdown/search
     def cb_sp():
         st.session_state.out_box_key = "선택 없음"
         st.session_state.search_query = ""
@@ -535,14 +535,14 @@ with col_side:
         st.session_state.out_box_key = "선택 없음"
         st.session_state.map_clicked_node = None
 
-    st.selectbox("특보지점", ["선택 없음"] + sp_opts, key="sp_box_key", on_change=cb_sp)
+    st.selectbox("Special Node", ["선택 없음"] + sp_opts, key="sp_box_key", on_change=cb_sp)
     st.selectbox("유역출구", ["선택 없음"] + out_opts, key="out_box_key", on_change=cb_out)
     st.text_input(
         "통합 검색 (지점명 또는 ID)",
-        key="search_query", placeholder="예: 200101#01", on_change=cb_search
+        key="search_query", placeholder="e.g. 200101#01", on_change=cb_search
     )
 
-    # ── selected_node 결정 (우선순위: 지도클릭 > 검색 > 드롭다운) ──
+    # ── Determine selected_node (Priority: Map Click > Search > Dropdown) ──
     selected_node = None
 
     if st.session_state.map_clicked_node:
@@ -565,7 +565,7 @@ with col_side:
         upstream_set = get_all_upstream(selected_node, upstream_map)
         nm = node_metadata.get(selected_node, selected_node)
         st.success(f"**{nm}** 위로 {len(upstream_set)}개 유역 연결됨")
-        # 드롭다운/검색 선택 시 지도 Fly-To
+        # Map Fly-To upon selection
         if not st.session_state.map_clicked_node and gdf_all_pts is not None:
             tgt = gdf_all_pts[gdf_all_pts["desc"] == selected_node]
             if not tgt.empty:
@@ -576,10 +576,10 @@ with col_side:
     else:
         upstream_set = set()
 
-    # --- 지도 표시 옵션 & 동적 범례 렌더링 ---
+    # --- Map Display Options & Dynamic Legend ---
     st.divider()
-    map_mode = st.radio("지도 표시 옵션", ["기본 (특보/일반 지점)", "매개변수 최적화 수행결과", "카테고리별 분류 (성능비교)"])
-    show_all_sp_bounds = st.checkbox("특보지점 유역 경계", value=False)
+    map_mode = st.radio("지도 표시 옵션", ["기본 (Special/일반 지점)", "매개변수 최적화 수행결과", "카테고리별 분류 (성능비교)"])
+    show_all_sp_bounds = st.checkbox("Special Node 유역 경계", value=False)
     active_pts = disp_pts
     if selected_node and len(upstream_set) > 0 and disp_pts is not None:
         active_pts = disp_pts[disp_pts["desc"].isin(upstream_set)]
@@ -635,7 +635,7 @@ with col_side:
                 else:
                     cat_counts["일반_기본값"] += 1
                 
-        # 타겟 노드 요약 정보 표시
+        # Display target node summary
         if selected_node:
             nm = node_metadata.get(selected_node, selected_node)
             tgt_cat = str(perf_dict.get(nm, "일반지점")).strip()
@@ -651,46 +651,46 @@ with col_side:
             st.info(
                 f"**📌 [{nm}] 지점 요약**\n\n"
                 f"**• 성능:** {cat_emoji} {tgt_cat} | **• 매개변수:** {opt_str}\n\n"
-                f"**• 상류 지점 (총 {len(unique_pts)}개)** 중 최적화 완료: **{opt_cnt}개** (기본값: {unopt_cnt}개)"
+                f"**• 상류 지점 (총 {len(unique_pts)} nodes)** 중 최적화 완료: **{opt_cnt}개** (기본값: {unopt_cnt} nodes)"
             )
     else:
         cat_counts = {"개선": 0, "부분개선": 0, "변화없음": 0, "재검토_1수위유량": 0, "재검토_2이상치": 0, "재검토_3본류": 0, "재검토_4조석": 0, "재검토_5댐보": 0, "재검토_기타": 0, "일반_최적화": 0, "일반_기본값": 0}
 
     # 범례 (옵션별로 항상 표시)
-    if map_mode == "기본 (특보/일반 지점)":
-        st.markdown(f"🔴 특보지점 ({sp_cnt}개)<br>⚫ 일반지점 ({gen_cnt}개)", unsafe_allow_html=True)
+    if map_mode == "기본 (Special/일반 지점)":
+        st.markdown(f"🔴 Special Node ({sp_cnt} nodes)<br>⚫ 일반지점 ({gen_cnt} nodes)", unsafe_allow_html=True)
     elif map_mode == "매개변수 최적화 수행결과":
         st.markdown(
-            f"🟢 최적화 수행 지점 ({opt_cnt}개) | <span style='font-size:13px;color:#666'>특보 {opt_sp_cnt}개 포함</span><br>"
-            f"🟠 기본값 유지 지점 ({unopt_cnt}개) | <span style='font-size:13px;color:#666'>특보 {unopt_sp_cnt}개 포함</span>", 
+            f"🟢 Optimized Node ({opt_cnt} nodes) | <span style='font-size:13px;color:#666'>Special {opt_sp_cnt} included</span><br>"
+            f"🟠 Default Node ({unopt_cnt} nodes) | <span style='font-size:13px;color:#666'>Special {unopt_sp_cnt} included</span>", 
             unsafe_allow_html=True
         )
     elif map_mode == "카테고리별 분류 (성능비교)":
         total_bul = sum(cat_counts.get(k, 0) for k in ["재검토_1수위유량","재검토_2이상치","재검토_3본류","재검토_4조석","재검토_5댐보","재검토_기타"])
         total_gen = cat_counts["일반_최적화"] + cat_counts["일반_기본값"]
         st.markdown(
-            f"🟢 개선 ({cat_counts['개선']}개)<br>"
-            f"🟡 부분개선 ({cat_counts['부분개선']}개)<br>"
-            f"🟣 변화없음 ({cat_counts['변화없음']}개)<br>"
-            f"🔴 재검토 ({total_bul}개)<br>"
+            f"🟢 개선 ({cat_counts['개선']} nodes)<br>"
+            f"🟡 부분개선 ({cat_counts['부분개선']} nodes)<br>"
+            f"🟣 변화없음 ({cat_counts['변화없음']} nodes)<br>"
+            f"🔴 재검토 ({total_bul} nodes)<br>"
             f"<span style='font-size:11px;color:#888'>"
-            f"&nbsp;&nbsp;① 수위-유량 곡선 ({cat_counts.get('재검토_1수위유량',0)}개)<br>"
-            f"&nbsp;&nbsp;② 이상치/결측치 ({cat_counts.get('재검토_2이상치',0)}개)<br>"
-            f"&nbsp;&nbsp;③ 본류(보운영) ({cat_counts.get('재검토_3본류',0)}개)<br>"
-            f"&nbsp;&nbsp;④ 조석 ({cat_counts.get('재검토_4조석',0)}개)<br>"
-            f"&nbsp;&nbsp;⑤ 댐/보 운영 ({cat_counts.get('재검토_5댐보',0)}개)"
+            f"&nbsp;&nbsp;① 수위-유량 곡선 ({cat_counts.get('재검토_1수위유량',0)} nodes)<br>"
+            f"&nbsp;&nbsp;② 이상치/결측치 ({cat_counts.get('재검토_2이상치',0)} nodes)<br>"
+            f"&nbsp;&nbsp;③ 본류(보운영) ({cat_counts.get('재검토_3본류',0)} nodes)<br>"
+            f"&nbsp;&nbsp;④ 조석 ({cat_counts.get('재검토_4조석',0)} nodes)<br>"
+            f"&nbsp;&nbsp;⑤ 댐/보 운영 ({cat_counts.get('재검토_5댐보',0)} nodes)"
             f"</span><br>"
-            f"⚫ 일반지점 (총 {total_gen}개)<br>"
+            f"⚫ 일반지점 (총 {total_gen} nodes)<br>"
             f"<span style='font-size:11px;color:#888'>"
-            f"&nbsp;&nbsp;🟢 최적화 수행 ({cat_counts['일반_최적화']}개)<br>"
-            f"&nbsp;&nbsp;🟠 기본값 유지 ({cat_counts['일반_기본값']}개)"
+            f"&nbsp;&nbsp;🟢 최적화 수행 ({cat_counts['일반_최적화']} nodes)<br>"
+            f"&nbsp;&nbsp;🟠 기본값 유지 ({cat_counts['일반_기본값']} nodes)"
             f"</span>",
             unsafe_allow_html=True
         )
 
 
 # ══════════════════════════════════════════
-#  지도 렌더링
+#  Map Rendering
 # ══════════════════════════════════════════
 with col_map:
     st.subheader("대상 유역")
@@ -706,11 +706,10 @@ with col_map:
         m = folium.Map(
             location=center, zoom_start=zoom, tiles="CartoDB positron",
             zoomSnap=0.1,
-            zoom_control=False,       # 확대/축소 버튼 숨기기
-            attributionControl=False  # 기본 내장 attribution 숨기기
+            zoom_control=False,       # Hide zoom controls
+            attributionControl=False  # Hide default attribution
         )
         
-        # Ctrl+휠 미세 줌: MacroElement로 지도 초기화 이후 JS 실행 보장
         from folium import MacroElement
         from jinja2 import Template
         _ctrl_zoom = MacroElement()
@@ -896,7 +895,7 @@ with col_map:
                 return {"fillColor": base, "color": "transparent", "weight": 0, "fillOpacity": 0.08}
             return {"fillColor": base, "color": "transparent", "weight": 0, "fillOpacity": 0.2}
 
-        # (1) 베이스 유역도 렌더링 (내부 채우기 및 얇은 경계)
+        # (1) Render base watersheds
         folium.GeoJson(
             disp_basins.to_json(),
             style_function=style_fn,
@@ -906,14 +905,14 @@ with col_map:
             )
         ).add_to(m)
         
-        # (2) 현재 선택된 유역(들)의 최외곽 경계선 (두꺼운 테두리)
+        # (2) Render outer boundary of selected watershed(s)
         watershed_bound_gdf = get_watershed_boundary(disp_basins, selected_ws)
         if watershed_bound_gdf is not None and not watershed_bound_gdf.empty:
             folium.GeoJson(
                 watershed_bound_gdf.to_json(),
                 style_function=lambda x: {
                     "fillColor": "none",
-                    "color": "#ff0000", # 빨간색 (전체 유역 경계)
+                    "color": "#ff0000",
                     "weight": 3,
                     "opacity": 0.9,
                 },
@@ -921,7 +920,7 @@ with col_map:
                 tooltip="선택된 유역 전체 범위"
             ).add_to(m)
         
-        # (3) 모든 특보지점의 개별 상류유역 경계선 (옵션 켰을 때 표출)
+        # (3) 모든 Special Node의 개별 상류유역 경계선 (옵션 켰을 때 표출)
         if show_all_sp_bounds:
             all_sp_bounds_gdf = get_all_special_boundaries(disp_basins, special_nodes, upstream_map, selected_ws)
             if all_sp_bounds_gdf is not None and not all_sp_bounds_gdf.empty:
@@ -929,19 +928,19 @@ with col_map:
                     all_sp_bounds_gdf.to_json(),
                     style_function=lambda x: {
                         "fillColor": "none",
-                        "color": "#ff0000", # 빨간색
-                        "weight": 1.5, # 얇게
+                        "color": "#ff0000",
+                        "weight": 1.5,
                         "opacity": 0.9,
-                        "dashArray": "3, 6" # 얇은 점선 스타일
+                        "dashArray": "3, 6"
                     },
-                    name="특보지점 개별 상류유역",
+                    name="Special Node 개별 상류유역",
                     tooltip=folium.GeoJsonTooltip(
                         fields=["desc"],
-                        aliases=["특보지점 ID:"]
+                        aliases=["Special Node ID:"]
                     )
                 ).add_to(m)
 
-        # (4) 현재 사용자가 선택한(클릭/검색) 지점의 상류 유역 경계선
+        # (4) Upstream boundary of the selected node
         if selected_node and len(upstream_set) > 0:
             upstream_basins = disp_basins[disp_basins["Name"].isin(upstream_set)]
             if not upstream_basins.empty:
@@ -960,10 +959,10 @@ with col_map:
                     merged_gdf.to_json(),
                     style_function=lambda x: {
                         "fillColor": "none",
-                        "color": "#ff0000", # 빨간색
+                        "color": "#ff0000",
                         "weight": 3,
                         "opacity": 1.0,
-                        "dashArray": "4, 6" # 점선 스타일
+                        "dashArray": "4, 6"
                     },
                     tooltip="상류 유역 전체 경계"
                 ).add_to(m)
@@ -980,10 +979,9 @@ with col_map:
             pts_to_render = disp_pts.drop_duplicates(subset=["desc"]).copy()
             if "pt_type" not in pts_to_render.columns:
                 pts_to_render["pt_type"] = "지점"
-            pts_to_render["_is_sp"] = pts_to_render["pt_type"] == "특보"
+            pts_to_render["_is_sp"] = pts_to_render["pt_type"] == "Special"
             pts_to_render = pts_to_render.sort_values("_is_sp")
             
-            # iterrows 대신 zip 활용하여 속도 대폭 향상
             pt_ids = pts_to_render["desc"].tolist()
             pt_names = pts_to_render["Name"].tolist()
             pt_types = pts_to_render["pt_type"].tolist()
@@ -992,10 +990,9 @@ with col_map:
 
             for pt_id, pt_name, pt_type, lat, lng in zip(pt_ids, pt_names, pt_types, lats, lngs):
                 is_sel = (str(pt_id).strip() == str(selected_node).strip()) if selected_node else False
-                is_special = (pt_type == "특보")
+                is_special = (pt_type == "Special")
                 
-                # 사전(Dictionary) 조회 최적화 (루프 내 1회만 조회)
-                is_opt = opt_dict.get(pt_id, False) if map_mode != "기본 (특보/일반 지점)" else False
+                is_opt = opt_dict.get(pt_id, False) if map_mode != "기본 (Special/일반 지점)" else False
                 cat = perf_dict.get(pt_name, "일반지점") if map_mode == "카테고리별 분류 (성능비교)" else None
                 note = reason_dict.get(pt_name, "") if map_mode == "카테고리별 분류 (성능비교)" else None
 
@@ -1005,11 +1002,11 @@ with col_map:
                 if map_mode == "매개변수 최적화 수행결과":
                     sz_gen = 5 if is_special else (4 if is_opt else 3)
                     if is_opt:
-                        bc, sz, wt, fc = ("black" if is_special else "#16a34a"), sz_gen, (1.5 if is_special else 2), "#16a34a"  # 초록
+                        bc, sz, wt, fc = ("black" if is_special else "#16a34a"), sz_gen, (1.5 if is_special else 2), "#16a34a"
                     else:
-                        bc, sz, wt, fc = ("black" if is_special else "#f97316"), sz_gen, (1.5 if is_special else 1.5), "#f97316"  # 주황색
+                        bc, sz, wt, fc = ("black" if is_special else "#f97316"), sz_gen, (1.5 if is_special else 1.5), "#f97316"
                 elif map_mode == "카테고리별 분류 (성능비교)":
-                    base_sz = 8.5 if is_special else 5  # 특보지점 20% 더 크게
+                    base_sz = 8.5 if is_special else 5  # Special Node 20% 더 크게
                     if cat == "개선":
                         bc, sz, wt, fc = ("black" if is_special else "#16a34a"), base_sz, (1.5 if is_special else 2), "#16a34a"
                     elif cat == "부분개선":
@@ -1021,16 +1018,16 @@ with col_map:
                     else:
                         sz_gen = 5 if is_special else 3
                         if is_opt:
-                            bc, sz, wt, fc = ("black" if is_special else "#16a34a"), sz_gen, 1.5, "#16a34a"  # 최적화
+                            bc, sz, wt, fc = ("black" if is_special else "#16a34a"), sz_gen, 1.5, "#16a34a"
                         else:
-                            bc, sz, wt, fc = ("black" if is_special else "#f97316"), sz_gen, 1.5, "#f97316"  # 기본값
-                else: # 기본
+                            bc, sz, wt, fc = ("black" if is_special else "#f97316"), sz_gen, 1.5, "#f97316"
+                else:
                     if is_special:
                         bc, sz, wt, fc = "black", 5, 1.5, "red"
                     else:
                         bc, sz, wt, fc = "black", 3, 1, "black"
 
-                # 재검토 사유 기반 원문자 심볼 (카테고리 모드에서만 적용)
+# Symbol based on review reason
                 불가_symbol = None
                 if map_mode == "카테고리별 분류 (성능비교)" and (str(cat).startswith("불가") or str(cat).startswith("재검토")):
                     search_text = str(cat) + " " + note
@@ -1048,7 +1045,7 @@ with col_map:
                         불가_symbol = "●"
 
                 if is_sel:
-                    # 선택된 노드는 특별한 애니메이션 DivIcon으로 렌더링 (깜빡임 효과)
+# Render selected node with animated DivIcon
                     icon_html = f"""
                     <div style="
                         width: 20px;
@@ -1072,7 +1069,7 @@ with col_map:
                         tooltip=f"{pt_name} [{pt_type}] — 선택됨"
                     ).add_to(m)
                 elif 불가_symbol:
-                    # 재검토 지점: 원문자 DivIcon 마커
+# Review node: Circle character DivIcon
                     icon_sz = 22 if is_special else 15
                     font_sz = 12 if is_special else 9
                     border_css = "border:1.5px solid black;" if is_special else "border:2px solid white;"
@@ -1105,8 +1102,7 @@ with col_map:
                         fill=True, fill_color=fc, fill_opacity=1.0
                     ).add_to(m)
 
-        # ── st_folium: last_object_clicked로 마커 클릭 감지 ──
-        # 이 방식이 유일하게 신뢰할 수 있는 iframe-safe 방법
+        # ── st_folium: Detect marker click ──
         st_data = st_folium(
             m, use_container_width=True, height=1000,
             returned_objects=["center", "zoom", "bounds", "last_object_clicked"]
@@ -1130,14 +1126,13 @@ with col_map:
                 prev_lat = st.session_state.get("_clk_lat")
                 prev_lng = st.session_state.get("_clk_lng")
 
-                # 새 클릭인 경우만 처리 (무한 rerun 방지)
+# Process new click only (prevent infinite rerun)
                 if clk_lat is not None and (clk_lat, clk_lng) != (prev_lat, prev_lng):
                     st.session_state["_clk_lat"] = clk_lat
                     st.session_state["_clk_lng"] = clk_lng
 
-                    # 0.005도 ≈ 약 500m 이내면 마커 클릭으로 판정
+# Click threshold (~500m)
                     if gdf_all_pts is not None and not gdf_all_pts.empty:
-                        # 벡터화된 거리 계산으로 속도 대폭 향상
                         dx = gdf_all_pts.geometry.x - clk_lng
                         dy = gdf_all_pts.geometry.y - clk_lat
                         dists = (dx**2 + dy**2)**0.5
@@ -1154,7 +1149,7 @@ with col_map:
         st.warning("공간 데이터 로딩에 실패했습니다.")
 
 # ══════════════════════════════════════════
-#  지도 내보내기 (TIFF)
+#  Export Map (TIFF)
 # ══════════════════════════════════════════
 with col_side:
     st.markdown("---")
@@ -1196,7 +1191,7 @@ with col_side:
 
 
 # ══════════════════════════════════════════
-#  유역 흐름도
+#  Watershed Flowchart
 # ══════════════════════════════════════════
 with col_graph:
     st.subheader("유역 흐름도")
