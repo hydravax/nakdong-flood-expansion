@@ -164,7 +164,36 @@ st.markdown(
     "<style>.main .block-container{padding-top:1rem;}h1{color:#1E3A8A;font-size:28px;}h2{font-size:20px;}</style>",
     unsafe_allow_html=True
 )
-st.title("낙동강유역 홍수특보지점 검토")
+st.markdown("""
+<style>
+/* 첫 번째 버튼(타이틀) 스타일 변경 */
+[data-testid="stMain"] div.stButton:first-of-type > button {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #1E3A8A !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    box-shadow: none !important;
+    margin-bottom: 0px !important;
+}
+[data-testid="stMain"] div.stButton:first-of-type > button:hover {
+    color: #3b82f6 !important;
+}
+[data-testid="stMain"] div.stButton:first-of-type > button p {
+    font-size: 28px !important;
+    font-weight: bold !important;
+    margin: 0 !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+if st.button("낙동강유역 홍수특보지점 검토", help="클릭하면 모든 선택이 초기화되고 처음 화면으로 돌아갑니다."):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
+
 st.markdown("수계 특성을 고려한 홍수예보 체계 마련 및 홍수특보 확대 대상 하천 검토")
 
 DATA_DIR = CURRENT_DIR
