@@ -1,0 +1,31 @@
+{
+"type": "FeatureCollection",
+"name": "21_형산강_유역출구",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "경주시(망성교)", "desc": "210101#01", "lon": 399006.265, "lat": 356733.129 }, "geometry": { "type": "Point", "coordinates": [ 399006.26538926968351, 356733.128777939709835, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "형산강상류", "desc": "210101#02", "lon": 398835.127, "lat": 359875.343 }, "geometry": { "type": "Point", "coordinates": [ 398835.126574667287059, 359875.343104011029936, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(효현교)", "desc": "210102#01", "lon": 396880.032, "lat": 359677.391 }, "geometry": { "type": "Point", "coordinates": [ 396880.031522331410088, 359677.390784946968779, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "대천", "desc": "210102#02", "lon": 398632.175, "lat": 359963.314 }, "geometry": { "type": "Point", "coordinates": [ 398632.174663348239847, 359963.314206431969069, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "남천합류전", "desc": "210103#01", "lon": 398774.671, "lat": 361447.019 }, "geometry": { "type": "Point", "coordinates": [ 398774.67060779716121, 361447.019347916997503, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "덕동저수지", "desc": "210104#01", "lon": 408680.303, "lat": 362138.0 }, "geometry": { "type": "Point", "coordinates": [ 408680.303374665090814, 362138.000475561013445, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "보문저수지", "desc": "210105#01", "lon": 404722.638, "lat": 363834.473 }, "geometry": { "type": "Point", "coordinates": [ 404722.637740157893859, 363834.472870743833482, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "북천", "desc": "210105#02", "lon": 399074.125, "lat": 364877.444 }, "geometry": { "type": "Point", "coordinates": [ 399074.125239864224568, 364877.444410813215654, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "칠평천", "desc": "210106#01", "lon": 402235.603, "lat": 378089.335 }, "geometry": { "type": "Point", "coordinates": [ 402235.603367336560041, 378089.334553660242818, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(달성교)", "desc": "210107#01", "lon": 401724.186, "lat": 386159.136 }, "geometry": { "type": "Point", "coordinates": [ 401724.185725950519554, 386159.135954357276205, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "안계댐수로합류전", "desc": "210107#02", "lon": 402912.453, "lat": 380264.132 }, "geometry": { "type": "Point", "coordinates": [ 402912.453034306003246, 380264.131878477055579, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "안계댐여수로", "desc": "210107#03", "lon": 403973.934, "lat": 380967.326 }, "geometry": { "type": "Point", "coordinates": [ 403973.93405188631732, 380967.325915193301626, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "안계댐수로", "desc": "210107#04", "lon": 403063.477, "lat": 380236.775 }, "geometry": { "type": "Point", "coordinates": [ 403063.476683915709145, 380236.77546414535027, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "기계천", "desc": "210107#05", "lon": 403313.909, "lat": 379162.962 }, "geometry": { "type": "Point", "coordinates": [ 403313.909040144877508, 379162.962314899777994, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "남천합류전", "desc": "210108#01", "lon": 398649.146, "lat": 361444.198 }, "geometry": { "type": "Point", "coordinates": [ 398649.146156163886189, 361444.197756785317324, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(서천교)", "desc": "210108#02", "lon": 398855.669, "lat": 362312.47 }, "geometry": { "type": "Point", "coordinates": [ 398855.669220729265362, 362312.47041974531021, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "북천합류전", "desc": "210108#03", "lon": 398898.459, "lat": 364873.486 }, "geometry": { "type": "Point", "coordinates": [ 398898.459002163028345, 364873.485773921012878, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(모아리)", "desc": "210108#04", "lon": 402083.506, "lat": 371608.32 }, "geometry": { "type": "Point", "coordinates": [ 402083.505642891046591, 371608.319855579757132, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "칠평천합류전", "desc": "210108#05", "lon": 402242.695, "lat": 377781.043 }, "geometry": { "type": "Point", "coordinates": [ 402242.694762828701641, 377781.042505713994615, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "기계천합류전", "desc": "210108#06", "lon": 403142.087, "lat": 379004.76 }, "geometry": { "type": "Point", "coordinates": [ 403142.086699044215493, 379004.760168241802603, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(강동대교)", "desc": "210108#07", "lon": 404336.178, "lat": 378322.981 }, "geometry": { "type": "Point", "coordinates": [ 404336.177745600405615, 378322.981302310130559, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(국당리)", "desc": "210109#01", "lon": 407056.925, "lat": 379898.132 }, "geometry": { "type": "Point", "coordinates": [ 407056.925277455360629, 379898.131555099505931, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "포항시(형산교)", "desc": "210109#02", "lon": 413928.921, "lat": 381821.124 }, "geometry": { "type": "Point", "coordinates": [ 413928.920852087438107, 381821.12361066241283, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "형산강하류", "desc": "210109#03", "lon": 414952.412, "lat": 384036.385 }, "geometry": { "type": "Point", "coordinates": [ 414952.41249022417469, 384036.385052908735815, 0.0 ] } }
+]
+}

@@ -1,0 +1,21 @@
+{
+"type": "FeatureCollection",
+"name": "23_회야수영강_유역출구",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "울산시(통천교)", "desc": "230102#01", "lon": 403250.08, "lat": 321575.124 }, "geometry": { "type": "Point", "coordinates": [ 403250.080093355383724, 321575.124105695576873, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "회야댐", "desc": "230102#02", "lon": 406607.674, "lat": 321497.718 }, "geometry": { "type": "Point", "coordinates": [ 406607.673543183715083, 321497.717880199896172, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(동천1교)", "desc": "230103#01", "lon": 407965.026, "lat": 320634.652 }, "geometry": { "type": "Point", "coordinates": [ 407965.026166242081672, 320634.65228006709367, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(덕신교)", "desc": "230103#02", "lon": 409244.72, "lat": 317703.407 }, "geometry": { "type": "Point", "coordinates": [ 409244.719650739047211, 317703.406725735461805, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "남창천합류전", "desc": "230103#03", "lon": 409814.177, "lat": 314940.739 }, "geometry": { "type": "Point", "coordinates": [ 409814.177230466972105, 314940.738644240773283, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "남창천", "desc": "230103#04", "lon": 409587.038, "lat": 314935.433 }, "geometry": { "type": "Point", "coordinates": [ 409587.037620573712047, 314935.433230515802279, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "회야강", "desc": "230103#05", "lon": 413170.818, "lat": 312891.521 }, "geometry": { "type": "Point", "coordinates": [ 413170.818157483299728, 312891.520632699248381, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "회동수원지", "desc": "230202#01", "lon": 392760.586, "lat": 295345.31 }, "geometry": { "type": "Point", "coordinates": [ 392760.58572205848759, 295345.309727859392297, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "부산시(동천교)", "desc": "230203#01", "lon": 392880.522, "lat": 293281.648 }, "geometry": { "type": "Point", "coordinates": [ 392880.521781723306049, 293281.647684628667776, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "부산시(원동교)", "desc": "230203#02", "lon": 392556.839, "lat": 290653.44 }, "geometry": { "type": "Point", "coordinates": [ 392556.839312477735803, 290653.439591864473186, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "온천천합류전", "desc": "230203#03", "lon": 392668.553, "lat": 290162.395 }, "geometry": { "type": "Point", "coordinates": [ 392668.552533852343913, 290162.395046622958034, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "부산시(세병교)", "desc": "230203#04", "lon": 389691.07, "lat": 290901.303 }, "geometry": { "type": "Point", "coordinates": [ 389691.070494538987987, 290901.302948980010115, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "온천천", "desc": "230203#05", "lon": 392567.988, "lat": 290129.416 }, "geometry": { "type": "Point", "coordinates": [ 392567.987992952927016, 290129.416218622238375, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "수영강", "desc": "230203#06", "lon": 393994.549, "lat": 287353.52 }, "geometry": { "type": "Point", "coordinates": [ 393994.548694999772124, 287353.52035049861297, 0.0 ] } }
+]
+}

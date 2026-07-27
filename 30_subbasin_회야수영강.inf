@@ -1,0 +1,37 @@
+30_subbasin.inf
+*** Information of Subbasin / 분할유역 정보
+  1 i                 [-](i)     ID
+  2 i_bas_seq(i)      [-](i)     ID in calculation order
+  3 bas_code(i)       [-](a)     code
+  4 bas_name(i)       [-](a)     name
+  5 bas_next(i)       [-](a)     code of next down
+  6 bas_type(i)       [-](a)     type {s: stage, f: facility, n: node}
+  7 bas_only(i)       [-](i)     whether subbasin only {1: only subbasin, 0: both subbasin and channel}
+  8 bas_stage_code(i) [-](a)     code of stage station or facility
+  9 bas_stage_name(i) [-](a)     name of stage station or facility
+ 10 bas_area(i)       [km^2](f)  area
+ 11 bas_length(i)     [km](f)    length of main stream
+ 12 bas_slope(i)      [-](f)     slope of overland
+ 13 L_bas_rain(i)     [-](i)     option for use of Thiessen method to get areal mean rainfall {0: not applied, otherwise: applied}
+ 14 L_eff_rain(i)     [-](i)     method of effective rainfall calculation {Rsa: 11, CN: 12, G-A: 13, fMax: 14, SacSMA = 21}
+ 15 alpha_R(i)        [-](f)     enlargement coefficient of areal mean rainfall {1.0-1.3} !$ runoff volume ↑
+ 16 AMC(i)            [-](f)     AMC defined by user {1.0 - 4.0: set AMC by the given value, -1: use AMC by determined by 5-day antecedent rainfall, 0: using defined Rsa or CN} !$ peak discharge ↑
+ 17 L_bas_runoff(i)   [-](i)     method of basin runoff calculation {SFM-1: 31, SFM-2: 32, UH-Nash: 41, UH-NRCS: 42, UH-Clark: 43, UH-unit: 44, UH-user: 49}
+
+   1    2 3         4                  5         6 7 8          9                     10      11     12       13 14 15    16    17
+--------------------
+14
+   1    1 230102#01 "울산시(통천교)"         230102#02 s 1 2301630    "울산시(통천교)"     113.032  23.873  0.008478 0 11  1.00  0.00 31
+   2    2 230102#02 "회야댐"                 230103#01 f 0 2301220    ""                    12.501   3.132  0.046488 0 11  1.00  0.00 31
+   3    3 230103#01 "울산시(동천1교)"        230103#02 s 0 2301650    "울산시(동천리)"       3.388   3.784  0.014435 0 11  1.00  0.00 31
+   4    4 230103#02 "울산시(덕신교)"         230103#03 s 0 2301670    "울산시(덕신교)"       8.081   4.401  0.008966 0 11  1.00  0.00 31
+   5    5 230103#03 "남창천합류전"           230103#05 n 0 -          -                      8.856   4.798  0.011600 0 11  1.00  0.00 31
+   6    6 230103#04 "남창천"                 230103#05 n 1 -          -                     51.880  14.511  0.009347 0 11  1.00  0.00 31
+   7    7 230103#05 "회야강"                 000000#01 n 0 -          -                     19.750   5.362  0.013221 0 11  1.00  0.00 31
+   8    8 230202#01 "회동수원지"             230203#01 f 1 2302230    ""                    99.544  22.249  0.008235 0 11  1.00  0.00 31
+   9    9 230203#01 "부산시(동천교)"         230203#02 s 0 2302640    "부산시(동천교)"       6.397   3.723  0.016214 0 11  1.00  0.00 31
+  10   10 230203#02 "부산시(원동교)"         230203#03 s 0 2302650    "부산시(원동교)"      27.580  10.734  0.010229 0 11  1.00  0.00 31
+  11   11 230203#03 "온천천합류전"           230203#06 n 0 -          -                      1.386   3.551  0.088935 0 11  1.00  0.00 31
+  12   12 230203#04 "부산시(세병교)"         230203#05 s 1 2302655    "부산시(세병교)"      39.025  14.556  0.017008 0 11  1.00  0.00 31
+  13   13 230203#05 "온천천"                 230203#06 n 0 -          -                     15.181   4.803  0.033154 0 11  1.00  0.00 31
+  14   14 230203#06 "수영강"                 000000#02 n 0 -          -                      9.305   4.169  0.030624 0 11  1.00  0.00 31

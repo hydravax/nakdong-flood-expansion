@@ -1,0 +1,9 @@
+{
+"type": "FeatureCollection",
+"name": "23_회야수영강_특보지점",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "울산시(덕신교)", "desc": "230103#02", "lon": 409244.72, "lat": 317703.407 }, "geometry": { "type": "Point", "coordinates": [ 409244.719650739047211, 317703.406725735461805, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "부산시(원동교)", "desc": "230203#02", "lon": 392556.839, "lat": 290653.44 }, "geometry": { "type": "Point", "coordinates": [ 392556.839312477735803, 290653.439591864473186, 0.0 ] } }
+]
+}

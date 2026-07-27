@@ -1,0 +1,24 @@
+{
+"type": "FeatureCollection",
+"name": "22_태화강_유역출구",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "울산시(구수교)", "desc": "220101#01", "lon": 395042.473, "lat": 330028.196 }, "geometry": { "type": "Point", "coordinates": [ 395042.47288557048887, 330028.195576952188276, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(대암교)", "desc": "220101#02", "lon": 398011.886, "lat": 330247.737 }, "geometry": { "type": "Point", "coordinates": [ 398011.88616796664428, 330247.737272300641052, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "둔기천합류전", "desc": "220101#03", "lon": 398385.675, "lat": 330441.085 }, "geometry": { "type": "Point", "coordinates": [ 398385.674980708572548, 330441.084675171121489, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(사연교)", "desc": "220101#04", "lon": 399894.467, "lat": 332849.605 }, "geometry": { "type": "Point", "coordinates": [ 399894.466968658962287, 332849.605321326467674, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "대암댐", "desc": "220102#01", "lon": 397872.336, "lat": 329720.33 }, "geometry": { "type": "Point", "coordinates": [ 397872.335641716374084, 329720.329874594288412, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "대곡댐", "desc": "220103#01", "lon": 396829.952, "lat": 338117.172 }, "geometry": { "type": "Point", "coordinates": [ 396829.951548342010938, 338117.172281839302741, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(반구교)", "desc": "220103#02", "lon": 396682.333, "lat": 336818.541 }, "geometry": { "type": "Point", "coordinates": [ 396682.332877132866997, 336818.541157774394378, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "사연댐", "desc": "220103#03", "lon": 399045.449, "lat": 333632.533 }, "geometry": { "type": "Point", "coordinates": [ 399045.449484067386948, 333632.533191296330187, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(선바위교)", "desc": "220104#01", "lon": 402626.452, "lat": 333497.24 }, "geometry": { "type": "Point", "coordinates": [ 402626.451557672116905, 333497.23984576575458, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(구영교)", "desc": "220104#02", "lon": 403876.854, "lat": 331705.954 }, "geometry": { "type": "Point", "coordinates": [ 403876.854008440859616, 331705.953784805431496, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(삼호교)", "desc": "220104#03", "lon": 406289.828, "lat": 330897.75 }, "geometry": { "type": "Point", "coordinates": [ 406289.828197983209975, 330897.749537153751589, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(신답교)", "desc": "220105#01", "lon": 412613.207, "lat": 339497.802 }, "geometry": { "type": "Point", "coordinates": [ 412613.207432368129957, 339497.802248159132432, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(병영교)", "desc": "220105#02", "lon": 413182.592, "lat": 333588.987 }, "geometry": { "type": "Point", "coordinates": [ 413182.591776812216267, 333588.987150312284939, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "동천", "desc": "220105#03", "lon": 413254.015, "lat": 330598.655 }, "geometry": { "type": "Point", "coordinates": [ 413254.015184037969448, 330598.654876005311962, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(태화교)", "desc": "220106#01", "lon": 409392.834, "lat": 330784.9 }, "geometry": { "type": "Point", "coordinates": [ 409392.834243123535998, 330784.899999031506013, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "동천합류전", "desc": "220106#02", "lon": 413053.198, "lat": 330563.017 }, "geometry": { "type": "Point", "coordinates": [ 413053.197939062665682, 330563.016603237309027, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "태화강", "desc": "220106#03", "lon": 416239.202, "lat": 328079.338 }, "geometry": { "type": "Point", "coordinates": [ 416239.20150500361342, 328079.337619590805843, 0.0 ] } }
+]
+}

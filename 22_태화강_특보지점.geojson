@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "22_태화강_특보지점",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "울산시(사연교)", "desc": "220101#04", "lon": 399894.467, "lat": 332849.605 }, "geometry": { "type": "Point", "coordinates": [ 399894.466968658962287, 332849.605321326467674, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(병영교)", "desc": "220105#02", "lon": 413182.592, "lat": 333588.987 }, "geometry": { "type": "Point", "coordinates": [ 413182.591776812216267, 333588.987150312284939, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "울산시(태화교)", "desc": "220106#01", "lon": 409392.834, "lat": 330784.9 }, "geometry": { "type": "Point", "coordinates": [ 409392.834243123535998, 330784.899999031506013, 0.0 ] } }
+]
+}

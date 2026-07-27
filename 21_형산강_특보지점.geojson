@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "21_형산강_특보지점",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "경주시(달성교)", "desc": "210107#01", "lon": 401724.186, "lat": 386159.136 }, "geometry": { "type": "Point", "coordinates": [ 401724.185725950519554, 386159.135954357276205, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(서천교)", "desc": "210108#02", "lon": 398855.669, "lat": 362312.47 }, "geometry": { "type": "Point", "coordinates": [ 398855.669220729265362, 362312.47041974531021, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "경주시(강동대교)", "desc": "210108#07", "lon": 404336.178, "lat": 378322.981 }, "geometry": { "type": "Point", "coordinates": [ 404336.177745600405615, 378322.981302310130559, 0.0 ] } },
+{ "type": "Feature", "properties": { "Name": "포항시(형산교)", "desc": "210109#02", "lon": 413928.921, "lat": 381821.124 }, "geometry": { "type": "Point", "coordinates": [ 413928.920852087438107, 381821.12361066241283, 0.0 ] } }
+]
+}
