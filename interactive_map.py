@@ -193,8 +193,8 @@ st.markdown("Improvement of Nakdong River Basin Flood Forecasting System")
 
 DATA_DIR = os.path.join(CURRENT_DIR, "input")
 WS_COLORS = {
-    "낙동강": "
-    "형산강": "
+    "낙동강": "#93c5fd", "낙동강동해": "#6ee7b7", "태화강": "#fde047",
+    "형산강": "#c4b5fd", "회야수영강": "#f9a8d4", "기타": "#d1d5db"
 }
 
 @st.cache_data
