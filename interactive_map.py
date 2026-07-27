@@ -175,6 +175,7 @@ WS_COLORS = {
 
 @st.cache_data
 def load_all_data():
+    # Cache invalidation trigger: 2
     inf_files = glob.glob(os.path.join(DATA_DIR, "30_subbasin_*.inf"))
     watersheds_names = [
         os.path.basename(f).replace("30_subbasin_", "").replace(".inf", "")
@@ -1127,11 +1128,18 @@ with col_map:
 with col_side:
     st.markdown("---")
     
-    tb = disp_basins.total_bounds
-    fallback_b = {
-        "_southWest": {"lat": tb[1], "lng": tb[0]},
-        "_northEast": {"lat": tb[3], "lng": tb[2]}
-    }
+    if disp_basins is not None and not disp_basins.empty:
+        tb = disp_basins.total_bounds
+        fallback_b = {
+            "_southWest": {"lat": tb[1], "lng": tb[0]},
+            "_northEast": {"lat": tb[3], "lng": tb[2]}
+        }
+    else:
+        fallback_b = {
+            "_southWest": {"lat": 34.0, "lng": 127.0},
+            "_northEast": {"lat": 37.0, "lng": 130.0}
+        }
+    
     b = st.session_state.get("map_bounds") or fallback_b
 
     col_btn1, col_btn2 = st.columns(2)
