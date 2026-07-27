@@ -189,12 +189,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-if st.button("낙동강유역 홍수Special Node 검토", help="Click to reset all selections and return to home."):
+if st.button("낙동강유역", help="Click to reset all selections and return to home."):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
 
-st.markdown("수계 특성을 고려한 홍수예보 체계 마련 및 홍수Special 확대 대상 하천 검토")
+st.markdown("낙동강권역 홍수예보 체계 개선")
 
 DATA_DIR = os.path.join(CURRENT_DIR, "input")
 WS_COLORS = {
