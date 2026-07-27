@@ -167,7 +167,7 @@ st.markdown(
 st.title("낙동강유역 홍수특보지점 검토")
 st.markdown("수계 특성을 고려한 홍수예보 체계 마련 및 홍수특보 확대 대상 하천 검토")
 
-DATA_DIR = "D:/RESEARCH/Nakdong"
+DATA_DIR = CURRENT_DIR
 WS_COLORS = {
     "낙동강": "#93c5fd", "낙동강동해": "#6ee7b7", "태화강": "#fde047",
     "형산강": "#c4b5fd", "회야수영강": "#f9a8d4", "기타": "#d1d5db"
