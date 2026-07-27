@@ -230,9 +230,10 @@ def load_all_data():
         except Exception:
             pass
 
+        GIS_DIR = os.path.join(DATA_DIR, "gis")
         basin_files = (
-            glob.glob(os.path.join(DATA_DIR, f"*유역도_{ws}.geojson")) or
-            glob.glob(os.path.join(DATA_DIR, f"유역도_{ws}.geojson"))
+            glob.glob(os.path.join(GIS_DIR, f"*유역도_{ws}.geojson")) or
+            glob.glob(os.path.join(GIS_DIR, f"유역도_{ws}.geojson"))
         )
         if basin_files:
             b = gpd.read_file(basin_files[0])
@@ -244,7 +245,7 @@ def load_all_data():
             gdf_basins_list.append(b)
 
         for tag, ptype in [("특보지점", "특보"), ("유역출구", "유역출구")]:
-            flist = glob.glob(os.path.join(DATA_DIR, f"*_{ws}_{tag}.geojson"))
+            flist = glob.glob(os.path.join(GIS_DIR, f"*_{ws}_{tag}.geojson"))
             if flist:
                 p = gpd.read_file(flist[0])
                 if p.crs is None:
@@ -270,9 +271,10 @@ def load_all_data():
 
 @st.cache_data
 def load_rivers():
+    GIS_DIR = os.path.join(DATA_DIR, "gis")
     rivers = []
     for rfile in ["낙동강_국가하천.geojson", "낙동강_지방하천.geojson"]:
-        paths = glob.glob(os.path.join(DATA_DIR, rfile))
+        paths = glob.glob(os.path.join(GIS_DIR, rfile))
         if paths:
             gdf = gpd.read_file(paths[0])
             if gdf.crs is None:
