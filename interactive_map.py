@@ -204,7 +204,7 @@ WS_COLORS = {
 
 @st.cache_data
 def load_all_data():
-    # Cache invalidation trigger: 2
+    # Cache invalidation trigger: 3
     inf_files = glob.glob(os.path.join(DATA_DIR, "30_subbasin_*.inf"))
     watersheds_names = [
         os.path.basename(f).replace("30_subbasin_", "").replace(".inf", "")
