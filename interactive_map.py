@@ -390,18 +390,7 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         elif cat.startswith("불가"): cat_emoji = "🔴"
         
         sp_str = "🔴특보" if is_sp else "⚫일반"
-        
-        if map_mode == "매개변수 최적화 수행결과":
-            main_info = opt_str
-            other_info = f"{sp_str} | {cat_emoji}{cat}"
-        elif map_mode == "카테고리별 분류 (성능비교)":
-            main_info = f"{cat_emoji}{cat}"
-            other_info = f"{sp_str} | {opt_str}"
-        else:
-            main_info = f"{sp_str}지점"
-            other_info = f"{opt_str} | {cat_emoji}{cat}"
-            
-        display_label = f"{lbl}\n{main_info}\n──────\n{other_info}"
+        display_label = f"{lbl}\n{sp_str}\n──────\n{opt_str} | {cat_emoji}{cat}"
         tooltip_text = f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}\n매개변수: {'최적화 수행' if is_opt else '기본값 유지'}\n성능비교: {cat}"
         
         if map_mode == "매개변수 최적화 수행결과":
