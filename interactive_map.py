@@ -684,11 +684,11 @@ with col_side:
 #  지도 렌더링
 # ══════════════════════════════════════════
 with col_map:
-    c_m1, c_m2 = st.columns([4, 1])
+    c_m1, c_m2 = st.columns([2, 1])
     with c_m1:
         st.subheader("대상 유역")
     with c_m2:
-        if st.button("🔄 화면맞춤", key="btn_reset_map", help="지도의 줌과 위치를 원래대로 되돌립니다."):
+        if st.button("🔄 화면맞춤", key="btn_reset_map", help="지도의 줌과 위치를 원래대로 되돌립니다.", use_container_width=True):
             st.session_state.pop("map_bounds", None)
             st.session_state.pop("map_center", None)
             st.session_state.pop("map_zoom", None)
@@ -1187,11 +1187,11 @@ with col_side:
 #  유역 흐름도
 # ══════════════════════════════════════════
 with col_graph:
-    c_g1, c_g2 = st.columns([4, 1])
+    c_g1, c_g2 = st.columns([3, 2])
     with c_g1:
         st.subheader("유역 흐름도")
     with c_g2:
-        if st.button("🔄 화면맞춤", key="btn_reset_graph", help="유역 흐름도 화면을 초기화하여 전체를 보여줍니다."):
+        if st.button("🔄 화면맞춤", key="btn_reset_graph", help="유역 흐름도 화면을 초기화하여 전체를 보여줍니다.", use_container_width=True):
             st.rerun()
     if selected_node and len(upstream_set) > 0:
         html_str = draw_network_flowchart(
