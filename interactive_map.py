@@ -448,16 +448,38 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
     try:
         html_str = net.generate_html()
         inject_html = """
-<button id="btn-fit" style="position: absolute; top: 10px; right: 10px; z-index: 9999; background-color: white; border: 1px solid rgba(49, 51, 63, 0.2); border-radius: 0.5rem; padding: 0.25rem 0.75rem; color: rgb(49, 51, 63); font-family: 'Source Sans Pro', sans-serif; font-size: 14px; font-weight: 400; cursor: pointer; box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;">🔄 화면맞춤</button>
+<div id="btn-fit" style="
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    z-index: 9999; 
+    background-color: white;
+    border: 2px solid rgba(0,0,0,0.2);
+    background-clip: padding-box;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #333;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    user-select: none;
+">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+    </svg>
+    <span>화면맞춤</span>
+</div>
 <script type="text/javascript">
 var btn = document.getElementById('btn-fit');
 btn.onmouseover = function() {
-    btn.style.borderColor = 'rgb(255, 75, 75)';
-    btn.style.color = 'rgb(255, 75, 75)';
+    btn.style.backgroundColor = '#f4f4f4';
 };
 btn.onmouseout = function() {
-    btn.style.borderColor = 'rgba(49, 51, 63, 0.2)';
-    btn.style.color = 'rgb(49, 51, 63)';
+    btn.style.backgroundColor = 'white';
 };
 btn.onclick = function(e) {
     e.stopPropagation();
@@ -1171,11 +1193,11 @@ with col_map:
             clk_map = st_data.get("last_clicked")
             
             clk_lat, clk_lng = None, None
-            # 우선적으로 마커/폴리곤 클릭(last_object_clicked)을 확인하고, 없거나 안 바뀌었으면 바탕 클릭(last_clicked) 사용
             if clk_obj and isinstance(clk_obj, dict):
                 clk_lat = clk_obj.get("lat")
                 clk_lng = clk_obj.get("lng")
-            elif clk_map and isinstance(clk_map, dict):
+                
+            if (clk_lat is None or clk_lng is None) and clk_map and isinstance(clk_map, dict):
                 clk_lat = clk_map.get("lat")
                 clk_lng = clk_map.get("lng")
 
