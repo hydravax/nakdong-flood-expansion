@@ -887,25 +887,13 @@ with col_map:
 
 
         def style_fn(feature):
-            fname = feature["properties"]["Name"]
-            ws = feature["properties"].get("watershed", "기타")
+            ws = feature["properties"].get("watershed", "미상")
             base = WS_COLORS.get(ws, "#d1d5db")
-            if selected_node:
-                if fname == selected_node:
-                    return {"fillColor": "#dc2626", "color": "#991b1b", "weight": 2, "fillOpacity": 0.8}
-                if fname in upstream_set:
-                    return {"fillColor": "#f97316", "color": "#c2410c", "weight": 1.5, "fillOpacity": 0.6}
-                return {"fillColor": base, "color": "transparent", "weight": 0, "fillOpacity": 0.08}
             return {"fillColor": base, "color": "transparent", "weight": 0, "fillOpacity": 0.2}
-
-        # (1) 베이스 유역도 렌더링 (내부 채우기 및 얇은 경계)
         folium.GeoJson(
             disp_basins.to_json(),
             style_function=style_fn,
-            tooltip=folium.GeoJsonTooltip(
-                fields=["Name", "watershed", "desc"],
-                aliases=["소유역:", "권역:", "지점:"]
-            )
+            interactive=False
         ).add_to(m)
         
         # (2) 현재 선택된 유역(들)의 최외곽 경계선 (두꺼운 테두리)
