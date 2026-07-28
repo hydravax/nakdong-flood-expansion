@@ -1178,7 +1178,12 @@ with col_side:
 #  유역 흐름도
 # ══════════════════════════════════════════
 with col_graph:
-    st.subheader("유역 흐름도")
+    c_g1, c_g2 = st.columns([4, 1])
+    with c_g1:
+        st.subheader("유역 흐름도")
+    with c_g2:
+        if st.button("🔄 전체화면 맞춤", key="btn_reset_graph", help="유역 흐름도 화면을 초기화하여 전체를 보여줍니다."):
+            st.rerun()
     if selected_node and len(upstream_set) > 0:
         html_str = draw_network_flowchart(
             selected_node, frozenset(upstream_set),
