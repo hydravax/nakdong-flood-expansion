@@ -892,28 +892,28 @@ with col_map:
                 var topAxis = document.createElement("div");
                 topAxis.style.position = "absolute"; topAxis.style.left = "0px"; topAxis.style.top = "0px";
                 topAxis.style.width = "100%"; topAxis.style.height = "15px";
-                topAxis.style.backgroundColor = "white"; topAxis.style.zIndex = "9999";
+                topAxis.style.backgroundColor = "white"; topAxis.style.zIndex = "800";
                 mapDiv.appendChild(topAxis);
 
                 // 2) 우측 마스크 (Right Axis)
                 var rightAxis = document.createElement("div");
                 rightAxis.style.position = "absolute"; rightAxis.style.right = "0px"; rightAxis.style.top = "0px";
                 rightAxis.style.width = "15px"; rightAxis.style.height = "100%";
-                rightAxis.style.backgroundColor = "white"; rightAxis.style.zIndex = "9999";
+                rightAxis.style.backgroundColor = "white"; rightAxis.style.zIndex = "800";
                 mapDiv.appendChild(rightAxis);
 
                 // 3) 좌측 마스크 (Left Axis)
                 var leftAxis = document.createElement("div");
                 leftAxis.style.position = "absolute"; leftAxis.style.left = "0px"; leftAxis.style.top = "0px";
                 leftAxis.style.width = "45px"; leftAxis.style.height = "100%";
-                leftAxis.style.backgroundColor = "white"; leftAxis.style.zIndex = "9999";
+                leftAxis.style.backgroundColor = "white"; leftAxis.style.zIndex = "800";
                 mapDiv.appendChild(leftAxis);
 
                 // 4) 하단 마스크 (Bottom Axis)
                 var bottomAxis = document.createElement("div");
                 bottomAxis.style.position = "absolute"; bottomAxis.style.left = "0px"; bottomAxis.style.bottom = "0px";
                 bottomAxis.style.width = "100%"; bottomAxis.style.height = "25px";
-                bottomAxis.style.backgroundColor = "white"; bottomAxis.style.zIndex = "9999";
+                bottomAxis.style.backgroundColor = "white"; bottomAxis.style.zIndex = "800";
                 mapDiv.appendChild(bottomAxis);
 
                 // 지도 영역 테두리 박스 (Inner Box)
@@ -923,7 +923,7 @@ with col_map:
                 innerBox.style.top = "15px"; innerBox.style.bottom = "25px";
                 innerBox.style.border = "2px solid #555";
                 innerBox.style.pointerEvents = "none"; // 클릭 통과
-                innerBox.style.zIndex = "9999";
+                innerBox.style.zIndex = "800";
                 mapDiv.appendChild(innerBox);
 
                 // 방위각과 축척표기가 마스크에 가려지지 않도록 위치 조정
