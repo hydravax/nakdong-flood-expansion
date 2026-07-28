@@ -1052,13 +1052,13 @@ with col_map:
         if selected_node and len(upstream_set) > 0:
             upstream_basins = disp_basins[disp_basins["Name"].isin(upstream_set)]
             if not upstream_basins.empty:
-                # 선택된 상류 유역의 배경을 반투명 청록색으로 강조
+                # 선택된 상류 유역의 배경을 반투명 노란색으로 강조
                 folium.GeoJson(
                     upstream_basins.to_json(),
                     style_function=lambda x: {
-                        "fillColor": "#22d3ee",
+                        "fillColor": "#facc15",
                         "fillOpacity": 0.22,
-                        "color": "#67e8f9",
+                        "color": "#fde047",
                         "weight": 0.8,
                         "opacity": 0.75,
                     },
@@ -1083,7 +1083,7 @@ with col_map:
                     merged_gdf.to_json(),
                     style_function=lambda x: {
                         "fillColor": "none",
-                        "color": "#06b6d4",
+                        "color": "#f59e0b",
                         "weight": 13,
                         "opacity": 0.20,
                     },
@@ -1094,7 +1094,7 @@ with col_map:
                     merged_gdf.to_json(),
                     style_function=lambda x: {
                         "fillColor": "none",
-                        "color": "#22d3ee",
+                        "color": "#facc15",
                         "weight": 4,
                         "opacity": 0.95,
                     },
@@ -1104,7 +1104,7 @@ with col_map:
                     merged_gdf.to_json(),
                     style_function=lambda x: {
                         "fillColor": "none",
-                        "color": "#ecfeff",
+                        "color": "#fef9c3",
                         "weight": 1.5,
                         "opacity": 1.0,
                         "dashArray": "5, 7"
