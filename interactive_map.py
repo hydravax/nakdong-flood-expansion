@@ -813,27 +813,35 @@ with col_map:
                 var FitControl = L.Control.extend({
                     options: { position: 'topright' },
                     onAdd: function (map) {
-                        var btn = L.DomUtil.create('button', 'fit-button');
-                        btn.innerHTML = '🔄 화면맞춤';
+                        var btn = L.DomUtil.create('div', 'fit-button');
+                        btn.innerHTML = `
+                            <svg width="12" height="12" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                            </svg>
+                            <span>화면맞춤</span>
+                        `;
                         btn.style.backgroundColor = 'white';
-                        btn.style.border = '1px solid rgba(49, 51, 63, 0.2)';
-                        btn.style.borderRadius = '0.5rem';
-                        btn.style.padding = '0.25rem 0.75rem';
-                        btn.style.color = 'rgb(49, 51, 63)';
-                        btn.style.fontFamily = '"Source Sans Pro", sans-serif';
-                        btn.style.fontSize = '14px';
-                        btn.style.fontWeight = '400';
+                        btn.style.border = '2px solid rgba(0,0,0,0.2)';
+                        btn.style.backgroundClip = 'padding-box';
+                        btn.style.borderRadius = '4px';
+                        btn.style.padding = '5px 10px';
                         btn.style.cursor = 'pointer';
-                        btn.style.boxShadow = 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px';
-                        btn.style.margin = '10px';
+                        btn.style.fontFamily = "'Helvetica Neue', Arial, Helvetica, sans-serif";
+                        btn.style.fontSize = '12px';
+                        btn.style.color = '#333';
+                        btn.style.boxShadow = '0 1px 5px rgba(0,0,0,0.65)';
+                        btn.style.display = 'flex';
+                        btn.style.alignItems = 'center';
+                        btn.style.gap = '5px';
+                        btn.style.userSelect = 'none';
                         
                         btn.onmouseover = function() {
-                            btn.style.borderColor = 'rgb(255, 75, 75)';
-                            btn.style.color = 'rgb(255, 75, 75)';
+                            btn.style.backgroundColor = '#f4f4f4';
                         };
                         btn.onmouseout = function() {
-                            btn.style.borderColor = 'rgba(49, 51, 63, 0.2)';
-                            btn.style.color = 'rgb(49, 51, 63)';
+                            btn.style.backgroundColor = 'white';
                         };
                         
                         L.DomEvent.disableClickPropagation(btn);
