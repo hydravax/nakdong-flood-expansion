@@ -12,9 +12,10 @@ import streamlit.components.v1 as components
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def _point_tooltip(point_name, point_id, point_type, status):
+def _point_tooltip(point_name, point_id, point_type, status=None):
     """지도 클릭 결과에서 지점 ID를 손실 없이 회수할 수 있는 툴팁."""
-    return f"{point_name} [{point_type}] · ID: {point_id} · {status}"
+    tooltip = f"{point_name} [{point_type}] · ID: {point_id}"
+    return f"{tooltip} · {status}" if status else tooltip
 
 
 def _clicked_node_from_event(clicked_object, clicked_tooltip, rendered_node_coords):
@@ -1205,18 +1206,50 @@ with col_map:
                             icon_size=(icon_sz, icon_sz),
                             icon_anchor=(icon_sz//2, icon_sz//2)
                         ),
-                        tooltip=_point_tooltip(pt_name, pt_id, pt_type, "클릭하여 선택")
+                        tooltip=_point_tooltip(pt_name, pt_id, pt_type)
                     ).add_to(m)
                 else:
                     folium.CircleMarker(
                         [lat, lng],
                         radius=sz,
-                        tooltip=_point_tooltip(pt_name, pt_id, pt_type, "클릭하여 선택"),
+                        tooltip=_point_tooltip(pt_name, pt_id, pt_type),
                         color=bc, weight=wt,
                         fill=True, fill_color=fc, fill_opacity=1.0
                     ).add_to(m)
         else:
             rendered_node_coords = {}
+
+        def on_map_change():
+            """컴포넌트 재실행 전에 마커 선택을 세션 상태에 반영한다."""
+            map_event = st.session_state.get("target_watershed_map", {})
+            if not isinstance(map_event, dict):
+                return
+
+            clicked_object = map_event.get("last_object_clicked")
+            clicked_tooltip = map_event.get("last_object_clicked_tooltip")
+            clicked_id = _clicked_node_from_event(
+                clicked_object, clicked_tooltip, rendered_node_coords
+            )
+            if not clicked_id:
+                return
+
+            click_signature = (
+                clicked_id,
+                clicked_object.get("lat"),
+                clicked_object.get("lng"),
+            )
+            if click_signature == st.session_state.get("_last_marker_click"):
+                return
+
+            st.session_state["_last_marker_click"] = click_signature
+            st.session_state["map_clicked_node"] = clicked_id
+            st.session_state["_reset_widgets"] = True
+
+            marker_lat, marker_lng = rendered_node_coords[clicked_id]
+            st.session_state["fly_to_target"] = {
+                "center": [marker_lat, marker_lng],
+                "zoom": 12
+            }
 
         # 지도 바탕(last_clicked)이 아닌 ID가 포함된 마커 클릭만 선택으로 처리한다.
         st_data = st_folium(
@@ -1225,7 +1258,8 @@ with col_map:
                 "center", "zoom", "bounds",
                 "last_object_clicked", "last_object_clicked_tooltip"
             ],
-            key="target_watershed_map"
+            key="target_watershed_map",
+            on_change=on_map_change
         )
 
         if st_data:
@@ -1237,31 +1271,6 @@ with col_map:
                 st.session_state["map_zoom"] = st_data["zoom"]
             if st_data.get("bounds"):
                 st.session_state["map_bounds"] = st_data["bounds"]
-
-            clk_obj = st_data.get("last_object_clicked")
-            clk_tooltip = st_data.get("last_object_clicked_tooltip")
-            clicked_id = _clicked_node_from_event(
-                clk_obj, clk_tooltip, rendered_node_coords
-            )
-
-            if clicked_id and isinstance(clk_obj, dict):
-                click_signature = (
-                    clicked_id,
-                    clk_obj.get("lat"),
-                    clk_obj.get("lng"),
-                )
-                if click_signature != st.session_state.get("_last_marker_click"):
-                    st.session_state["_last_marker_click"] = click_signature
-                    st.session_state.map_clicked_node = clicked_id
-                    st.session_state._reset_widgets = True
-
-                    tgt = pts_to_render[pts_to_render["desc"].astype(str).str.strip() == clicked_id]
-                    if not tgt.empty:
-                        st.session_state["fly_to_target"] = {
-                            "center": [tgt.iloc[0].geometry.y, tgt.iloc[0].geometry.x],
-                            "zoom": 12
-                        }
-                    st.rerun()
     else:
         st.warning("공간 데이터 로딩에 실패했습니다.")
 
