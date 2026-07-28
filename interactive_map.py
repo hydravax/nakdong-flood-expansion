@@ -535,16 +535,22 @@ with col_side:
         st.session_state.out_box_key = "선택 없음"
         st.session_state.search_query = ""
         st.session_state.map_clicked_node = None
+        st.session_state.pop("_clk_lat", None)
+        st.session_state.pop("_clk_lng", None)
 
     def cb_out():
         st.session_state.sp_box_key = "선택 없음"
         st.session_state.search_query = ""
         st.session_state.map_clicked_node = None
+        st.session_state.pop("_clk_lat", None)
+        st.session_state.pop("_clk_lng", None)
 
     def cb_search():
         st.session_state.sp_box_key = "선택 없음"
         st.session_state.out_box_key = "선택 없음"
         st.session_state.map_clicked_node = None
+        st.session_state.pop("_clk_lat", None)
+        st.session_state.pop("_clk_lng", None)
 
     st.selectbox("특보지점", ["선택 없음"] + sp_opts, key="sp_box_key", on_change=cb_sp)
     st.selectbox("유역출구", ["선택 없음"] + out_opts, key="out_box_key", on_change=cb_out)
@@ -1148,9 +1154,8 @@ with col_map:
         # 이 방식이 유일하게 신뢰할 수 있는 iframe-safe 방법
         st_data = st_folium(
             m, use_container_width=True, height=1000,
-            returned_objects=["center", "zoom", "bounds", "last_object_clicked"]
+            returned_objects=["center", "zoom", "bounds", "last_object_clicked", "last_clicked"]
         )
-
 
         if st_data:
             if st_data.get("center"):
@@ -1162,33 +1167,48 @@ with col_map:
             if st_data.get("bounds"):
                 st.session_state["map_bounds"] = st_data["bounds"]
 
-            clk = st_data.get("last_object_clicked")
-            if clk and isinstance(clk, dict):
-                clk_lat = clk.get("lat")
-                clk_lng = clk.get("lng")
-                prev_lat = st.session_state.get("_clk_lat")
-                prev_lng = st.session_state.get("_clk_lng")
+            clk_obj = st_data.get("last_object_clicked")
+            clk_map = st_data.get("last_clicked")
+            
+            clk_lat, clk_lng = None, None
+            # 우선적으로 마커/폴리곤 클릭(last_object_clicked)을 확인하고, 없거나 안 바뀌었으면 바탕 클릭(last_clicked) 사용
+            if clk_obj and isinstance(clk_obj, dict):
+                clk_lat = clk_obj.get("lat")
+                clk_lng = clk_obj.get("lng")
+            elif clk_map and isinstance(clk_map, dict):
+                clk_lat = clk_map.get("lat")
+                clk_lng = clk_map.get("lng")
 
-                # 새 클릭인 경우만 처리 (무한 rerun 방지)
-                if clk_lat is not None and (clk_lat, clk_lng) != (prev_lat, prev_lng):
-                    st.session_state["_clk_lat"] = clk_lat
-                    st.session_state["_clk_lng"] = clk_lng
+            prev_lat = st.session_state.get("_clk_lat")
+            prev_lng = st.session_state.get("_clk_lng")
 
-                    # 0.005도 ≈ 약 500m 이내면 마커 클릭으로 판정
-                    if gdf_all_pts is not None and not gdf_all_pts.empty:
-                        # 벡터화된 거리 계산으로 속도 대폭 향상
-                        dx = gdf_all_pts.geometry.x - clk_lng
-                        dy = gdf_all_pts.geometry.y - clk_lat
-                        dists = (dx**2 + dy**2)**0.5
-                        min_idx = dists.idxmin()
-                        min_d = dists.loc[min_idx]
+            # 새 클릭인 경우만 처리 (무한 rerun 방지)
+            if clk_lat is not None and (clk_lat, clk_lng) != (prev_lat, prev_lng):
+                st.session_state["_clk_lat"] = clk_lat
+                st.session_state["_clk_lng"] = clk_lng
 
-                        if min_d < 0.025:
-                            nearest_id = gdf_all_pts.loc[min_idx, "desc"]
-                            if st.session_state.map_clicked_node != nearest_id:
-                                st.session_state.map_clicked_node = nearest_id
-                                st.session_state._reset_widgets = True
-                                st.rerun()
+                # 0.05도 ≈ 약 5.5km 이내면 마커 클릭으로 판정 (관대하게 적용하여 클릭 미스 및 중복 클릭 버그 방지)
+                if gdf_all_pts is not None and not gdf_all_pts.empty:
+                    # 벡터화된 거리 계산으로 속도 대폭 향상
+                    dx = gdf_all_pts.geometry.x - clk_lng
+                    dy = gdf_all_pts.geometry.y - clk_lat
+                    dists = (dx**2 + dy**2)**0.5
+                    min_idx = dists.idxmin()
+                    min_d = dists.loc[min_idx]
+
+                    if min_d < 0.05:
+                        nearest_id = gdf_all_pts.loc[min_idx, "desc"]
+                        # 이미 선택된 지점이라도, 다시 클릭하면 화면 중앙으로 날아가도록(fly_to_target) 유도
+                        st.session_state.map_clicked_node = nearest_id
+                        st.session_state._reset_widgets = True
+                        
+                        tgt = gdf_all_pts[gdf_all_pts["desc"] == nearest_id]
+                        if not tgt.empty:
+                            st.session_state["fly_to_target"] = {
+                                "center": [tgt.iloc[0].geometry.y, tgt.iloc[0].geometry.x],
+                                "zoom": 12
+                            }
+                        st.rerun()
     else:
         st.warning("공간 데이터 로딩에 실패했습니다.")
 
