@@ -3,11 +3,53 @@ import geopandas as gpd
 import folium
 from streamlit_folium import st_folium
 import glob, os
+import math
 import pandas as pd
+import re
 from pyvis.network import Network
 import streamlit.components.v1 as components
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def _point_tooltip(point_name, point_id, point_type, status):
+    """지도 클릭 결과에서 지점 ID를 손실 없이 회수할 수 있는 툴팁."""
+    return f"{point_name} [{point_type}] · ID: {point_id} · {status}"
+
+
+def _clicked_node_from_event(clicked_object, clicked_tooltip, rendered_node_coords):
+    """
+    마커 툴팁에 심은 ID와 클릭 좌표가 같은 지점을 가리킬 때만 ID를 반환한다.
+
+    streamlit-folium은 툴팁이 없는 폴리곤을 클릭하면 직전 툴팁 문자열을
+    유지할 수 있다. 따라서 ID뿐 아니라 해당 마커 좌표와의 오차(30m 이내)
+    도 함께 검증한다. 최근접 지점으로 대체하지는 않는다.
+    """
+    if not isinstance(clicked_object, dict) or not isinstance(clicked_tooltip, str):
+        return None
+
+    match = re.search(r"(?:^|[\s·>])ID:\s*([^\s·<]+)", clicked_tooltip)
+    if not match:
+        return None
+
+    clicked_id = match.group(1).strip()
+    marker_coords = rendered_node_coords.get(clicked_id)
+    if marker_coords is None:
+        return None
+
+    try:
+        click_lat = float(clicked_object["lat"])
+        click_lng = float(clicked_object["lng"])
+        marker_lat, marker_lng = marker_coords
+    except (KeyError, TypeError, ValueError):
+        return None
+
+    mean_lat = math.radians((click_lat + marker_lat) / 2.0)
+    dx_m = (click_lng - marker_lng) * 111_320.0 * math.cos(mean_lat)
+    dy_m = (click_lat - marker_lat) * 110_574.0
+    distance_m = math.hypot(dx_m, dy_m)
+    return clicked_id if distance_m <= 30.0 else None
+
 
 def _calc_css_dims_from_zoom_bounds(sw_lat, sw_lng, ne_lat, ne_lng, zoom):
     """
@@ -503,7 +545,7 @@ perf_dict, reason_dict = load_performance_data()
 for _k, _v in [
     ("sp_box_key", "선택 없음"), ("out_box_key", "선택 없음"),
     ("search_query", ""), ("map_clicked_node", None),
-    ("_clk_lat", None), ("_clk_lng", None),
+    ("_last_marker_click", None),
     ("_reset_widgets", False)
 ]:
     if _k not in st.session_state:
@@ -557,22 +599,19 @@ with col_side:
         st.session_state.out_box_key = "선택 없음"
         st.session_state.search_query = ""
         st.session_state.map_clicked_node = None
-        st.session_state.pop("_clk_lat", None)
-        st.session_state.pop("_clk_lng", None)
+        st.session_state.pop("_last_marker_click", None)
 
     def cb_out():
         st.session_state.sp_box_key = "선택 없음"
         st.session_state.search_query = ""
         st.session_state.map_clicked_node = None
-        st.session_state.pop("_clk_lat", None)
-        st.session_state.pop("_clk_lng", None)
+        st.session_state.pop("_last_marker_click", None)
 
     def cb_search():
         st.session_state.sp_box_key = "선택 없음"
         st.session_state.out_box_key = "선택 없음"
         st.session_state.map_clicked_node = None
-        st.session_state.pop("_clk_lat", None)
-        st.session_state.pop("_clk_lng", None)
+        st.session_state.pop("_last_marker_click", None)
 
     st.selectbox("특보지점", ["선택 없음"] + sp_opts, key="sp_box_key", on_change=cb_sp)
     st.selectbox("유역출구", ["선택 없음"] + out_opts, key="out_box_key", on_change=cb_out)
@@ -1056,8 +1095,13 @@ with col_map:
             pt_types = pts_to_render["pt_type"].tolist()
             lats = pts_to_render.geometry.y.tolist()
             lngs = pts_to_render.geometry.x.tolist()
+            rendered_node_coords = {
+                str(pt_id).strip(): (float(lat), float(lng))
+                for pt_id, lat, lng in zip(pt_ids, lats, lngs)
+            }
 
             for pt_id, pt_name, pt_type, lat, lng in zip(pt_ids, pt_names, pt_types, lats, lngs):
+                pt_id = str(pt_id).strip()
                 is_sel = (str(pt_id).strip() == str(selected_node).strip()) if selected_node else False
                 is_special = (pt_type == "특보")
                 
@@ -1136,7 +1180,7 @@ with col_map:
                     folium.Marker(
                         [lat, lng],
                         icon=folium.DivIcon(html=icon_html),
-                        tooltip=f"{pt_name} [{pt_type}] — 선택됨"
+                        tooltip=_point_tooltip(pt_name, pt_id, pt_type, "선택됨")
                     ).add_to(m)
                 elif 불가_symbol:
                     # 재검토 지점: 원문자 DivIcon 마커
@@ -1161,22 +1205,27 @@ with col_map:
                             icon_size=(icon_sz, icon_sz),
                             icon_anchor=(icon_sz//2, icon_sz//2)
                         ),
-                        tooltip=f"{pt_name} [{pt_type}] — 클릭하여 선택"
+                        tooltip=_point_tooltip(pt_name, pt_id, pt_type, "클릭하여 선택")
                     ).add_to(m)
                 else:
                     folium.CircleMarker(
                         [lat, lng],
                         radius=sz,
-                        tooltip=f"{pt_name} [{pt_type}] — 클릭하여 선택",
+                        tooltip=_point_tooltip(pt_name, pt_id, pt_type, "클릭하여 선택"),
                         color=bc, weight=wt,
                         fill=True, fill_color=fc, fill_opacity=1.0
                     ).add_to(m)
+        else:
+            rendered_node_coords = {}
 
-        # ── st_folium: last_object_clicked로 마커 클릭 감지 ──
-        # 이 방식이 유일하게 신뢰할 수 있는 iframe-safe 방법
+        # 지도 바탕(last_clicked)이 아닌 ID가 포함된 마커 클릭만 선택으로 처리한다.
         st_data = st_folium(
             m, use_container_width=True, height=1000,
-            returned_objects=["center", "zoom", "bounds", "last_object_clicked", "last_clicked"]
+            returned_objects=[
+                "center", "zoom", "bounds",
+                "last_object_clicked", "last_object_clicked_tooltip"
+            ],
+            key="target_watershed_map"
         )
 
         if st_data:
@@ -1190,47 +1239,29 @@ with col_map:
                 st.session_state["map_bounds"] = st_data["bounds"]
 
             clk_obj = st_data.get("last_object_clicked")
-            clk_map = st_data.get("last_clicked")
-            
-            clk_lat, clk_lng = None, None
-            if clk_obj and isinstance(clk_obj, dict):
-                clk_lat = clk_obj.get("lat")
-                clk_lng = clk_obj.get("lng")
-                
-            if (clk_lat is None or clk_lng is None) and clk_map and isinstance(clk_map, dict):
-                clk_lat = clk_map.get("lat")
-                clk_lng = clk_map.get("lng")
+            clk_tooltip = st_data.get("last_object_clicked_tooltip")
+            clicked_id = _clicked_node_from_event(
+                clk_obj, clk_tooltip, rendered_node_coords
+            )
 
-            prev_lat = st.session_state.get("_clk_lat")
-            prev_lng = st.session_state.get("_clk_lng")
+            if clicked_id and isinstance(clk_obj, dict):
+                click_signature = (
+                    clicked_id,
+                    clk_obj.get("lat"),
+                    clk_obj.get("lng"),
+                )
+                if click_signature != st.session_state.get("_last_marker_click"):
+                    st.session_state["_last_marker_click"] = click_signature
+                    st.session_state.map_clicked_node = clicked_id
+                    st.session_state._reset_widgets = True
 
-            # 새 클릭인 경우만 처리 (무한 rerun 방지)
-            if clk_lat is not None and (clk_lat, clk_lng) != (prev_lat, prev_lng):
-                st.session_state["_clk_lat"] = clk_lat
-                st.session_state["_clk_lng"] = clk_lng
-
-                # 0.05도 ≈ 약 5.5km 이내면 마커 클릭으로 판정 (관대하게 적용하여 클릭 미스 및 중복 클릭 버그 방지)
-                if gdf_all_pts is not None and not gdf_all_pts.empty:
-                    # 벡터화된 거리 계산으로 속도 대폭 향상
-                    dx = gdf_all_pts.geometry.x - clk_lng
-                    dy = gdf_all_pts.geometry.y - clk_lat
-                    dists = (dx**2 + dy**2)**0.5
-                    min_idx = dists.idxmin()
-                    min_d = dists.loc[min_idx]
-
-                    if min_d < 0.05:
-                        nearest_id = gdf_all_pts.loc[min_idx, "desc"]
-                        # 이미 선택된 지점이라도, 다시 클릭하면 화면 중앙으로 날아가도록(fly_to_target) 유도
-                        st.session_state.map_clicked_node = nearest_id
-                        st.session_state._reset_widgets = True
-                        
-                        tgt = gdf_all_pts[gdf_all_pts["desc"] == nearest_id]
-                        if not tgt.empty:
-                            st.session_state["fly_to_target"] = {
-                                "center": [tgt.iloc[0].geometry.y, tgt.iloc[0].geometry.x],
-                                "zoom": 12
-                            }
-                        st.rerun()
+                    tgt = pts_to_render[pts_to_render["desc"].astype(str).str.strip() == clicked_id]
+                    if not tgt.empty:
+                        st.session_state["fly_to_target"] = {
+                            "center": [tgt.iloc[0].geometry.y, tgt.iloc[0].geometry.x],
+                            "zoom": 12
+                        }
+                    st.rerun()
     else:
         st.warning("공간 데이터 로딩에 실패했습니다.")
 
