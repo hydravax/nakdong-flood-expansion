@@ -1052,6 +1052,20 @@ with col_map:
         if selected_node and len(upstream_set) > 0:
             upstream_basins = disp_basins[disp_basins["Name"].isin(upstream_set)]
             if not upstream_basins.empty:
+                # 선택된 상류 유역의 배경을 반투명 청록색으로 강조
+                folium.GeoJson(
+                    upstream_basins.to_json(),
+                    style_function=lambda x: {
+                        "fillColor": "#22d3ee",
+                        "fillOpacity": 0.22,
+                        "color": "#67e8f9",
+                        "weight": 0.8,
+                        "opacity": 0.75,
+                    },
+                    interactive=False,
+                    name="선택 지점 상류 유역"
+                ).add_to(m)
+
                 import warnings
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
@@ -1063,14 +1077,37 @@ with col_map:
                     merged_geom = merged_geom.buffer(-0.0015)
                 
                 merged_gdf = gpd.GeoDataFrame(geometry=[merged_geom], crs=disp_basins.crs)
+
+                # 넓고 투명한 외곽선 위에 밝은 선을 겹쳐 네온 halo 효과 생성
                 folium.GeoJson(
                     merged_gdf.to_json(),
                     style_function=lambda x: {
                         "fillColor": "none",
-                        "color": "#ff0000", # 빨간색
-                        "weight": 3,
+                        "color": "#06b6d4",
+                        "weight": 13,
+                        "opacity": 0.20,
+                    },
+                    interactive=False,
+                    name="상류 유역 네온 외곽"
+                ).add_to(m)
+                folium.GeoJson(
+                    merged_gdf.to_json(),
+                    style_function=lambda x: {
+                        "fillColor": "none",
+                        "color": "#22d3ee",
+                        "weight": 4,
+                        "opacity": 0.95,
+                    },
+                    interactive=False
+                ).add_to(m)
+                folium.GeoJson(
+                    merged_gdf.to_json(),
+                    style_function=lambda x: {
+                        "fillColor": "none",
+                        "color": "#ecfeff",
+                        "weight": 1.5,
                         "opacity": 1.0,
-                        "dashArray": "4, 6" # 점선 스타일
+                        "dashArray": "5, 7"
                     },
                     tooltip="상류 유역 전체 경계"
                 ).add_to(m)
@@ -1160,27 +1197,42 @@ with col_map:
                         불가_symbol = "●"
 
                 if is_sel:
-                    # 선택된 노드는 특별한 애니메이션 DivIcon으로 렌더링 (깜빡임 효과)
+                    # 선택 지점은 노란색 네온 마커로 다른 지점과 명확히 구분
                     icon_html = f"""
                     <div style="
-                        width: 20px;
-                        height: 20px;
-                        background-color: red;
+                        width: 22px;
+                        height: 22px;
+                        background-color: #facc15;
                         border-radius: 50%;
-                        border: 3px solid white;
-                        box-shadow: 0 0 15px 5px rgba(255,0,0,0.8);
-                        animation: pulse 1s infinite alternate;
+                        border: 3px solid #111827;
+                        box-shadow:
+                            0 0 0 4px rgba(255,255,255,0.95),
+                            0 0 14px 7px rgba(250,204,21,0.85);
+                        animation: selectedPointPulse 1s infinite alternate;
                     "></div>
                     <style>
-                        @keyframes pulse {{
-                            0% {{ transform: scale(0.8); box-shadow: 0 0 5px 2px rgba(255,0,0,0.5); }}
-                            100% {{ transform: scale(1.5); box-shadow: 0 0 20px 8px rgba(255,0,0,0.9); }}
+                        @keyframes selectedPointPulse {{
+                            0% {{
+                                transform: scale(0.85);
+                                box-shadow: 0 0 0 3px rgba(255,255,255,0.9),
+                                            0 0 8px 4px rgba(250,204,21,0.6);
+                            }}
+                            100% {{
+                                transform: scale(1.18);
+                                box-shadow: 0 0 0 5px rgba(255,255,255,1),
+                                            0 0 20px 10px rgba(250,204,21,0.95);
+                            }}
                         }}
                     </style>
                     """
                     folium.Marker(
                         [lat, lng],
-                        icon=folium.DivIcon(html=icon_html),
+                        icon=folium.DivIcon(
+                            html=icon_html,
+                            icon_size=(22, 22),
+                            icon_anchor=(11, 11),
+                            class_name="selected-node-icon"
+                        ),
                         tooltip=_point_tooltip(pt_name, pt_id, pt_type, "선택됨")
                     ).add_to(m)
                 elif 불가_symbol:
@@ -1246,6 +1298,8 @@ with col_map:
             st.session_state["_reset_widgets"] = True
 
             marker_lat, marker_lng = rendered_node_coords[clicked_id]
+            st.session_state["map_center"] = [marker_lat, marker_lng]
+            st.session_state["map_zoom"] = 12
             st.session_state["fly_to_target"] = {
                 "center": [marker_lat, marker_lng],
                 "zoom": 12
@@ -1259,7 +1313,9 @@ with col_map:
                 "last_object_clicked", "last_object_clicked_tooltip"
             ],
             key="target_watershed_map",
-            on_change=on_map_change
+            on_change=on_map_change,
+            center=tuple(center),
+            zoom=zoom
         )
 
         if st_data:
