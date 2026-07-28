@@ -684,7 +684,16 @@ with col_side:
 #  지도 렌더링
 # ══════════════════════════════════════════
 with col_map:
-    st.subheader("대상 유역")
+    c_m1, c_m2 = st.columns([4, 1])
+    with c_m1:
+        st.subheader("대상 유역")
+    with c_m2:
+        if st.button("🔄 화면맞춤", key="btn_reset_map", help="지도의 줌과 위치를 원래대로 되돌립니다."):
+            st.session_state.pop("map_bounds", None)
+            st.session_state.pop("map_center", None)
+            st.session_state.pop("map_zoom", None)
+            st.session_state.pop("fly_to_target", None)
+            st.rerun()
     if disp_basins is not None and not disp_basins.empty:
         fly_to = st.session_state.pop("fly_to_target", None)
         bounds = disp_basins.total_bounds
@@ -1182,7 +1191,7 @@ with col_graph:
     with c_g1:
         st.subheader("유역 흐름도")
     with c_g2:
-        if st.button("🔄 전체화면 맞춤", key="btn_reset_graph", help="유역 흐름도 화면을 초기화하여 전체를 보여줍니다."):
+        if st.button("🔄 화면맞춤", key="btn_reset_graph", help="유역 흐름도 화면을 초기화하여 전체를 보여줍니다."):
             st.rerun()
     if selected_node and len(upstream_set) > 0:
         html_str = draw_network_flowchart(
