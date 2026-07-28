@@ -355,7 +355,7 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         return None
 
     net = Network(
-        height="700px", width="100%", directed=True,
+        height="1000px", width="100%", directed=True,
         bgcolor="#ffffff", font_color="black", cdn_resources="in_line"
     )
     net.set_options(
@@ -446,7 +446,20 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
                     queue.append(p)
 
     try:
-        return net.generate_html()
+        html_str = net.generate_html()
+        inject_html = """
+<button id="btn-fit" style="position: absolute; top: 10px; right: 10px; z-index: 9999; padding: 5px 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">🔄 화면맞춤</button>
+<script type="text/javascript">
+document.getElementById('btn-fit').onclick = function(e) {
+    e.stopPropagation();
+    if (typeof network !== 'undefined') {
+        network.fit({animation: {duration: 500, easingFunction: 'easeInOutQuad'}});
+    }
+};
+</script>
+"""
+        html_str = html_str.replace("</body>", inject_html + "</body>")
+        return html_str
     except Exception as e:
         return f"<p>오류: {e}</p>"
 
@@ -684,16 +697,7 @@ with col_side:
 #  지도 렌더링
 # ══════════════════════════════════════════
 with col_map:
-    c_m1, c_m2 = st.columns([2, 1])
-    with c_m1:
-        st.subheader("대상 유역")
-    with c_m2:
-        if st.button("🔄 화면맞춤", key="btn_reset_map", help="지도의 줌과 위치를 원래대로 되돌립니다.", use_container_width=True):
-            st.session_state.pop("map_bounds", None)
-            st.session_state.pop("map_center", None)
-            st.session_state.pop("map_zoom", None)
-            st.session_state.pop("fly_to_target", None)
-            st.rerun()
+    st.subheader("대상 유역")
     if disp_basins is not None and not disp_basins.empty:
         fly_to = st.session_state.pop("fly_to_target", None)
         bounds = disp_basins.total_bounds
@@ -714,6 +718,9 @@ with col_map:
         from folium import MacroElement
         from jinja2 import Template
         _ctrl_zoom = MacroElement()
+        
+        bounds_arr = f"[[{bounds[1]}, {bounds[0]}], [{bounds[3]}, {bounds[2]}]]" if bounds is not None else "null"
+        
         _ctrl_zoom._template = Template("""
             {% macro script(this, kwargs) %}
             (function() {
@@ -727,6 +734,29 @@ with col_map:
                 window.addEventListener('blur', function() { ctrlHeld = false; });
 
                 var _map = {{ this._parent.get_name() }};
+                
+                var btn = document.createElement('button');
+                btn.innerHTML = '🔄 화면맞춤';
+                btn.style.position = 'absolute';
+                btn.style.top = '10px';
+                btn.style.right = '10px';
+                btn.style.zIndex = '9999';
+                btn.style.padding = '5px 10px';
+                btn.style.backgroundColor = 'white';
+                btn.style.border = '1px solid #ccc';
+                btn.style.borderRadius = '4px';
+                btn.style.cursor = 'pointer';
+                btn.style.fontWeight = 'bold';
+                btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    _map.fitBounds(__BOUNDS_PLACEHOLDER__);
+                };
+                
+                var mapDiv = _map.getContainer();
+                mapDiv.appendChild(btn);
+                
                 _map.scrollWheelZoom.disable();
                 _map.getContainer().addEventListener('wheel', function(e) {
                     e.preventDefault();
@@ -880,7 +910,7 @@ with col_map:
                 setTimeout(drawGraticule, 100);
             })();
             {% endmacro %}
-        """)
+        """.replace("__BOUNDS_PLACEHOLDER__", bounds_arr))
         m.add_child(_ctrl_zoom)
 
 
@@ -1187,12 +1217,7 @@ with col_side:
 #  유역 흐름도
 # ══════════════════════════════════════════
 with col_graph:
-    c_g1, c_g2 = st.columns([3, 2])
-    with c_g1:
-        st.subheader("유역 흐름도")
-    with c_g2:
-        if st.button("🔄 화면맞춤", key="btn_reset_graph", help="유역 흐름도 화면을 초기화하여 전체를 보여줍니다.", use_container_width=True):
-            st.rerun()
+    st.subheader("유역 흐름도")
     if selected_node and len(upstream_set) > 0:
         html_str = draw_network_flowchart(
             selected_node, frozenset(upstream_set),
