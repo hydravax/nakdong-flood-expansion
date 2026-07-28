@@ -253,9 +253,11 @@ def load_all_data():
                 p = p.to_crs(epsg=4326)
                 p["pt_type"] = ptype
                 p["watershed"] = ws
-                if ptype == "특보":
-                    for _, row in p.iterrows():
+                for _, row in p.iterrows():
+                    if ptype == "특보":
                         special_nodes.add(row["desc"])
+                    if "Name" in row and "desc" in row:
+                        global_node_meta[row["desc"]] = row["Name"]
                 gdf_pts_list.append(p)
 
     gdf_all_basins = (
