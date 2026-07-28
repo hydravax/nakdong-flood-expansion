@@ -1,88 +1,1389 @@
 {
-"type": "FeatureCollection",
-"name": "24_낙동강동해_유역출구",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
-"features": [
-{ "type": "Feature", "properties": { "Name": "울진군(올미골교)", "desc": "240102#01", "lon": 406884.279, "lat": 494963.535 }, "geometry": { "type": "Point", "coordinates": [ 406884.278682078584097, 494963.534815312479623, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "울진군(월변교)", "desc": "240102#02", "lon": 413824.909, "lat": 490477.087 }, "geometry": { "type": "Point", "coordinates": [ 413824.908978924504481, 490477.087263755267486, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "남대천", "desc": "240102#03", "lon": 414301.326, "lat": 489254.95 }, "geometry": { "type": "Point", "coordinates": [ 414301.326135242008604, 489254.949717630224768, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신원천합류전", "desc": "240103#01", "lon": 397200.951, "lat": 465579.376 }, "geometry": { "type": "Point", "coordinates": [ 397200.950632989231963, 465579.376417360967025, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신원천", "desc": "240103#02", "lon": 397250.562, "lat": 465580.522 }, "geometry": { "type": "Point", "coordinates": [ 397250.561721576552372, 465580.521850970631931, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "본돈천합류전", "desc": "240103#03", "lon": 400451.778, "lat": 468770.866 }, "geometry": { "type": "Point", "coordinates": [ 400451.778294374991674, 468770.866181667428464, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "본돈천", "desc": "240103#04", "lon": 400502.096, "lat": 468741.198 }, "geometry": { "type": "Point", "coordinates": [ 400502.096070432220586, 468741.198467585141771, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신암천합류전", "desc": "240103#05", "lon": 401675.568, "lat": 472625.128 }, "geometry": { "type": "Point", "coordinates": [ 401675.567892578197643, 472625.127994229202159, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신암천", "desc": "240103#06", "lon": 401649.323, "lat": 472686.208 }, "geometry": { "type": "Point", "coordinates": [ 401649.323231559246778, 472686.207623985421378, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "장수포천", "desc": "240103#07", "lon": 401556.578, "lat": 477650.932 }, "geometry": { "type": "Point", "coordinates": [ 401556.577865039929748, 477650.931735372752883, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "매화저수지", "desc": "240104#01", "lon": 410199.068, "lat": 478970.748 }, "geometry": { "type": "Point", "coordinates": [ 410199.067955649225041, 478970.747870235762093, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "매화리(매화교)", "desc": "240104#02", "lon": 412125.262, "lat": 482227.312 }, "geometry": { "type": "Point", "coordinates": [ 412125.261543630680535, 482227.312189816962928, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "매화천", "desc": "240104#03", "lon": 411919.221, "lat": 486510.798 }, "geometry": { "type": "Point", "coordinates": [ 411919.220888575888239, 486510.798193332448136, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "후곡천합류전", "desc": "240105#01", "lon": 397501.252, "lat": 484712.984 }, "geometry": { "type": "Point", "coordinates": [ 397501.251723458757624, 484712.984268074447755, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "후곡천", "desc": "240105#02", "lon": 397499.817, "lat": 484774.651 }, "geometry": { "type": "Point", "coordinates": [ 397499.817001557268668, 484774.650826090946794, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "보부천합류전", "desc": "240105#03", "lon": 402832.521, "lat": 485455.72 }, "geometry": { "type": "Point", "coordinates": [ 402832.521132868714631, 485455.720323660585564, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "보부천", "desc": "240105#04", "lon": 402783.024, "lat": 485454.538 }, "geometry": { "type": "Point", "coordinates": [ 402783.024392115010414, 485454.537542498088442, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "광천", "desc": "240105#05", "lon": 411940.208, "lat": 487652.905 }, "geometry": { "type": "Point", "coordinates": [ 411940.207551119558048, 487652.905102656455711, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "울진군(구산리)", "desc": "240106#01", "lon": 411379.409, "lat": 486312.212 }, "geometry": { "type": "Point", "coordinates": [ 411379.408524835074786, 486312.21172771952115, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "매화천합류전", "desc": "240106#02", "lon": 411795.489, "lat": 486507.709 }, "geometry": { "type": "Point", "coordinates": [ 411795.488697463879362, 486507.708568118861876, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "광천합류전", "desc": "240106#03", "lon": 411992.006, "lat": 487561.639 }, "geometry": { "type": "Point", "coordinates": [ 411992.005887731327675, 487561.63878687255783, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "울진군(수산교)", "desc": "240106#04", "lon": 413568.597, "lat": 487878.878 }, "geometry": { "type": "Point", "coordinates": [ 413568.596997836662922, 487878.878189589129761, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "왕피천", "desc": "240106#05", "lon": 414790.892, "lat": 488495.98 }, "geometry": { "type": "Point", "coordinates": [ 414790.891764934291132, 488495.980436908663251, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "영덕군(인량교)", "desc": "240110#01", "lon": 412888.306, "lat": 441521.115 }, "geometry": { "type": "Point", "coordinates": [ 412888.306074986292515, 441521.11488929920597, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "남천합류전", "desc": "240110#02", "lon": 413394.256, "lat": 441194.272 }, "geometry": { "type": "Point", "coordinates": [ 413394.255701399466489, 441194.272449323325418, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "묘곡저수지", "desc": "240110#03", "lon": 411189.291, "lat": 438733.544 }, "geometry": { "type": "Point", "coordinates": [ 411189.290738910669461, 438733.543766561895609, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "남천", "desc": "240110#04", "lon": 413373.197, "lat": 441039.493 }, "geometry": { "type": "Point", "coordinates": [ 413373.197241199610289, 441039.493089698720723, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "송천", "desc": "240110#05", "lon": 417168.728, "lat": 443540.87 }, "geometry": { "type": "Point", "coordinates": [ 417168.728216417715885, 443540.869797805440612, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신안천합류전", "desc": "240202#01", "lon": 404368.798, "lat": 430239.89 }, "geometry": { "type": "Point", "coordinates": [ 404368.797744216979481, 430239.889794105780311, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신안천", "desc": "240202#02", "lon": 404417.886, "lat": 430271.9 }, "geometry": { "type": "Point", "coordinates": [ 404417.885853000450879, 430271.899531213042792, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "영덕오십천상류", "desc": "240202#03", "lon": 407016.888, "lat": 427896.672 }, "geometry": { "type": "Point", "coordinates": [ 407016.887668248091359, 427896.671896508778445, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "가천합류전", "desc": "240203#01", "lon": 404297.295, "lat": 419533.79 }, "geometry": { "type": "Point", "coordinates": [ 404297.294902425957844, 419533.789644890814088, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "가천", "desc": "240203#02", "lon": 404300.2, "lat": 419410.465 }, "geometry": { "type": "Point", "coordinates": [ 404300.199999120668508, 419410.46543854981428, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "영덕군(대지리)", "desc": "240203#03", "lon": 407105.411, "lat": 424196.89 }, "geometry": { "type": "Point", "coordinates": [ 407105.410657520289533, 424196.89006848167628, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "소서천합류전", "desc": "240203#04", "lon": 406042.288, "lat": 426947.929 }, "geometry": { "type": "Point", "coordinates": [ 406042.287967958371155, 426947.929109629127197, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "용덕천합류전", "desc": "240203#05", "lon": 404874.045, "lat": 426796.791 }, "geometry": { "type": "Point", "coordinates": [ 404874.04526486271061, 426796.790523650124669, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "용덕천", "desc": "240203#06", "lon": 404846.937, "lat": 426888.695 }, "geometry": { "type": "Point", "coordinates": [ 404846.936579503875691, 426888.694664292153902, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "소서천", "desc": "240203#07", "lon": 405666.313, "lat": 427031.53 }, "geometry": { "type": "Point", "coordinates": [ 405666.313312969869003, 427031.529733088391367, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "대서천", "desc": "240203#08", "lon": 406996.399, "lat": 427711.086 }, "geometry": { "type": "Point", "coordinates": [ 406996.399166397866793, 427711.086056094267406, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "관동천합류전", "desc": "240204#01", "lon": 409211.273, "lat": 428905.819 }, "geometry": { "type": "Point", "coordinates": [ 409211.273129905224778, 428905.819486019900069, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "관동천", "desc": "240204#02", "lon": 409129.821, "lat": 429181.497 }, "geometry": { "type": "Point", "coordinates": [ 409129.821383356815204, 429181.497360404231586, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "영덕군(영덕대교)", "desc": "240204#03", "lon": 412938.142, "lat": 425356.426 }, "geometry": { "type": "Point", "coordinates": [ 412938.142087944608647, 425356.426258825988043, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "영덕오십천하류", "desc": "240204#04", "lon": 414504.316, "lat": 420520.664 }, "geometry": { "type": "Point", "coordinates": [ 414504.316048976965249, 420520.663959258585237, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "용연저수지", "desc": "240207#01", "lon": 407231.972, "lat": 393690.937 }, "geometry": { "type": "Point", "coordinates": [ 407231.972173839109018, 393690.93717451748671, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "초곡천합류전", "desc": "240208#01", "lon": 413985.816, "lat": 393853.563 }, "geometry": { "type": "Point", "coordinates": [ 413985.815778703137767, 393853.562961785239168, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "초곡천", "desc": "240208#02", "lon": 414013.848, "lat": 393730.852 }, "geometry": { "type": "Point", "coordinates": [ 414013.847684463718906, 393730.852125880715903, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "곡강천", "desc": "240208#03", "lon": 416488.62, "lat": 394871.498 }, "geometry": { "type": "Point", "coordinates": [ 416488.620483454549685, 394871.498132306907792, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "진전천+3합류전", "desc": "240302#01", "lon": 416649.047, "lat": 368036.684 }, "geometry": { "type": "Point", "coordinates": [ 416649.046841887640767, 368036.684096840384882, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "진전천+3", "desc": "240302#02", "lon": 416623.958, "lat": 368036.068 }, "geometry": { "type": "Point", "coordinates": [ 416623.958388513885438, 368036.067973355879076, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "진전천+2합류후", "desc": "240302#03", "lon": 416492.463, "lat": 368279.627 }, "geometry": { "type": "Point", "coordinates": [ 416492.462872871023137, 368279.627416032832116, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "진전천+1합류전", "desc": "240302#04", "lon": 416681.804, "lat": 368747.004 }, "geometry": { "type": "Point", "coordinates": [ 416681.803554514772259, 368747.004215127089992, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "진전천+1", "desc": "240302#05", "lon": 416756.305, "lat": 368779.683 }, "geometry": { "type": "Point", "coordinates": [ 416756.30514933844097, 368779.683497401885688, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "진전저수지", "desc": "240302#06", "lon": 416985.167, "lat": 369679.921 }, "geometry": { "type": "Point", "coordinates": [ 416985.167063140426762, 369679.921421498642303, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "은적천합류전", "desc": "240302#07", "lon": 416700.977, "lat": 371030.271 }, "geometry": { "type": "Point", "coordinates": [ 416700.977459418587387, 371030.270708312047645, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "은적천", "desc": "240302#08", "lon": 416802.056, "lat": 371001.908 }, "geometry": { "type": "Point", "coordinates": [ 416802.055685458471999, 371001.908098722866271, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "석낭지천합류전", "desc": "240302#09", "lon": 416615.948, "lat": 372447.219 }, "geometry": { "type": "Point", "coordinates": [ 416615.947672569192946, 372447.218723805388436, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "석낭지천", "desc": "240302#10", "lon": 416715.493, "lat": 372480.516 }, "geometry": { "type": "Point", "coordinates": [ 416715.492752550984733, 372480.515979773364961, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "문충천합류전", "desc": "240302#11", "lon": 416633.486, "lat": 373774.146 }, "geometry": { "type": "Point", "coordinates": [ 416633.486359360977076, 373774.145805857144296, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "문충천", "desc": "240302#12", "lon": 416582.584, "lat": 373803.742 }, "geometry": { "type": "Point", "coordinates": [ 416582.583745940413792, 373803.742290192982182, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신광천합류전", "desc": "240302#13", "lon": 416691.249, "lat": 374485.09 }, "geometry": { "type": "Point", "coordinates": [ 416691.248560271342285, 374485.089746575453319, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "항사천", "desc": "240302#14", "lon": 414110.261, "lat": 371275.427 }, "geometry": { "type": "Point", "coordinates": [ 414110.261239458282944, 371275.427098742453381, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "항사천+", "desc": "240302#15", "lon": 414825.523, "lat": 371786.407 }, "geometry": { "type": "Point", "coordinates": [ 414825.522947863792069, 371786.406821336480789, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신광천+", "desc": "240302#16", "lon": 413755.81, "lat": 372439.044 }, "geometry": { "type": "Point", "coordinates": [ 413755.80968729313463, 372439.044277136446908, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "오어저수지", "desc": "240302#17", "lon": 414634.957, "lat": 372398.726 }, "geometry": { "type": "Point", "coordinates": [ 414634.956934618705418, 372398.726068751711864, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "신광천", "desc": "240302#18", "lon": 416713.283, "lat": 374609.028 }, "geometry": { "type": "Point", "coordinates": [ 416713.282527850300539, 374609.02751278935466, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "용산천합류전", "desc": "240302#19", "lon": 417156.171, "lat": 374959.281 }, "geometry": { "type": "Point", "coordinates": [ 417156.171085609006695, 374959.281189436616842, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "용산천", "desc": "240302#20", "lon": 417206.309, "lat": 374960.518 }, "geometry": { "type": "Point", "coordinates": [ 417206.308711483550724, 374960.518393248610664, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "포항시(문덕3교)", "desc": "240302#21", "lon": 417172.11, "lat": 375329.862 }, "geometry": { "type": "Point", "coordinates": [ 417172.110280092572793, 375329.862236735993065, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "세계천합류전", "desc": "240302#22", "lon": 417477.326, "lat": 377188.347 }, "geometry": { "type": "Point", "coordinates": [ 417477.326006058137864, 377188.346602879522834, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "세계천", "desc": "240302#23", "lon": 417577.576, "lat": 377190.826 }, "geometry": { "type": "Point", "coordinates": [ 417577.576024052104913, 377190.826153968111612, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "원용교", "desc": "240302#24", "lon": 417304.855, "lat": 378078.709 }, "geometry": { "type": "Point", "coordinates": [ 417304.855428326525725, 378078.70862363721244, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "인덕교", "desc": "240302#25", "lon": 416779.327, "lat": 379052.906 }, "geometry": { "type": "Point", "coordinates": [ 416779.326940733357333, 379052.905532495526131, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "냉천교", "desc": "240302#26", "lon": 416556.077, "lat": 379972.874 }, "geometry": { "type": "Point", "coordinates": [ 416556.077255392214283, 379972.873837288003415, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "냉천", "desc": "240302#27", "lon": 417800.22, "lat": 381361.0 }, "geometry": { "type": "Point", "coordinates": [ 417800.219973992032465, 381360.999952857382596, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "호암천합류전", "desc": "240304#01", "lon": 419444.563, "lat": 358573.464 }, "geometry": { "type": "Point", "coordinates": [ 419444.563071157899685, 358573.464429064071737, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "호암천", "desc": "240304#02", "lon": 419542.731, "lat": 358668.446 }, "geometry": { "type": "Point", "coordinates": [ 419542.731339244928677, 358668.445509344339371, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "용동천합류후", "desc": "240304#03", "lon": 419924.827, "lat": 358461.992 }, "geometry": { "type": "Point", "coordinates": [ 419924.826923584681936, 358461.992046920408029, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "양북면(입천교)", "desc": "240304#04", "lon": 420549.892, "lat": 357582.929 }, "geometry": { "type": "Point", "coordinates": [ 420549.891815456096083, 357582.929085190757178, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "양북면(두산대교)", "desc": "240304#05", "lon": 421363.556, "lat": 355197.013 }, "geometry": { "type": "Point", "coordinates": [ 421363.556148249423131, 355197.013014130759984, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "양북면(구갈교)", "desc": "240304#06", "lon": 423023.573, "lat": 353171.741 }, "geometry": { "type": "Point", "coordinates": [ 423023.573187213158235, 353171.74074304086389, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "대종천", "desc": "240304#07", "lon": 424577.684, "lat": 352378.033 }, "geometry": { "type": "Point", "coordinates": [ 424577.684076195000671, 352378.033182023908012, 0.0 ] } }
-]
+  "type": "FeatureCollection",
+  "name": "24_낙동강동해_유역출구",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::5186"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "울진군(올미골교)",
+        "desc": "240102#01",
+        "lon": 406884.279,
+        "lat": 494963.535
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          406884.2786820786,
+          494963.5348153125,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "울진군(월변교)",
+        "desc": "240102#02",
+        "lon": 413824.909,
+        "lat": 490477.087
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413824.9089789245,
+          490477.08726375527,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "남대천",
+        "desc": "240102#03",
+        "lon": 414301.326,
+        "lat": 489254.95
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414301.326135242,
+          489254.9497176302,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신원천합류전",
+        "desc": "240103#01",
+        "lon": 397200.951,
+        "lat": 465579.376
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          397200.95063298923,
+          465579.37641736097,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신원천",
+        "desc": "240103#02",
+        "lon": 397250.562,
+        "lat": 465580.522
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          397250.56172157655,
+          465580.52185097063,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "본돈천합류전",
+        "desc": "240103#03",
+        "lon": 400451.778,
+        "lat": 468770.866
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          400451.778294375,
+          468770.8661816674,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "본돈천",
+        "desc": "240103#04",
+        "lon": 400502.096,
+        "lat": 468741.198
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          400502.0960704322,
+          468741.19846758514,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신암천합류전",
+        "desc": "240103#05",
+        "lon": 401675.568,
+        "lat": 472625.128
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          401675.5678925782,
+          472625.1279942292,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신암천",
+        "desc": "240103#06",
+        "lon": 401649.323,
+        "lat": 472686.208
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          401649.32323155925,
+          472686.2076239854,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "장수포천",
+        "desc": "240103#07",
+        "lon": 401556.578,
+        "lat": 477650.932
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          401556.57786503993,
+          477650.93173537275,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "매화저수지",
+        "desc": "240104#01",
+        "lon": 410199.068,
+        "lat": 478970.748
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          410199.0679556492,
+          478970.74787023576,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "매화리(매화교)",
+        "desc": "240104#02",
+        "lon": 412125.262,
+        "lat": 482227.312
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          412125.2615436307,
+          482227.31218981696,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "매화천",
+        "desc": "240104#03",
+        "lon": 411919.221,
+        "lat": 486510.798
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          411919.2208885759,
+          486510.79819333245,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "후곡천합류전",
+        "desc": "240105#01",
+        "lon": 397501.252,
+        "lat": 484712.984
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          397501.25172345876,
+          484712.98426807445,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "후곡천",
+        "desc": "240105#02",
+        "lon": 397499.817,
+        "lat": 484774.651
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          397499.81700155727,
+          484774.65082609095,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "보부천합류전",
+        "desc": "240105#03",
+        "lon": 402832.521,
+        "lat": 485455.72
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          402832.5211328687,
+          485455.7203236606,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "보부천",
+        "desc": "240105#04",
+        "lon": 402783.024,
+        "lat": 485454.538
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          402783.024392115,
+          485454.5375424981,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "광천",
+        "desc": "240105#05",
+        "lon": 411940.208,
+        "lat": 487652.905
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          411940.20755111956,
+          487652.90510265646,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "울진군(구산리)",
+        "desc": "240106#01",
+        "lon": 411379.409,
+        "lat": 486312.212
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          411379.4085248351,
+          486312.2117277195,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "매화천합류전",
+        "desc": "240106#02",
+        "lon": 411795.489,
+        "lat": 486507.709
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          411795.4886974639,
+          486507.70856811886,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "광천합류전",
+        "desc": "240106#03",
+        "lon": 411992.006,
+        "lat": 487561.639
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          411992.0058877313,
+          487561.63878687256,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "울진군(수산교)",
+        "desc": "240106#04",
+        "lon": 413568.597,
+        "lat": 487878.878
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413568.59699783666,
+          487878.87818958913,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "왕피천",
+        "desc": "240106#05",
+        "lon": 414790.892,
+        "lat": 488495.98
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414790.8917649343,
+          488495.98043690866,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "영덕군(인량교)",
+        "desc": "240110#01",
+        "lon": 412888.306,
+        "lat": 441521.115
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          412888.3060749863,
+          441521.1148892992,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "남천합류전",
+        "desc": "240110#02",
+        "lon": 413394.256,
+        "lat": 441194.272
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413394.25570139947,
+          441194.2724493233,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "묘곡저수지",
+        "desc": "240110#03",
+        "lon": 411189.291,
+        "lat": 438733.544
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          411189.29073891067,
+          438733.5437665619,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "남천",
+        "desc": "240110#04",
+        "lon": 413373.197,
+        "lat": 441039.493
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413373.1972411996,
+          441039.4930896987,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "송천",
+        "desc": "240110#05",
+        "lon": 417168.728,
+        "lat": 443540.87
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417168.7282164177,
+          443540.86979780544,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신안천합류전",
+        "desc": "240202#02",
+        "lon": 404368.798,
+        "lat": 430239.89
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          404368.797744217,
+          430239.8897941058,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신안천",
+        "desc": "240202#01",
+        "lon": 404417.886,
+        "lat": 430271.9
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          404417.88585300045,
+          430271.89953121304,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "영덕오십천상류",
+        "desc": "240202#03",
+        "lon": 407016.888,
+        "lat": 427896.672
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          407016.8876682481,
+          427896.6718965088,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "가천합류전",
+        "desc": "240203#01",
+        "lon": 404297.295,
+        "lat": 419533.79
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          404297.29490242596,
+          419533.7896448908,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "가천",
+        "desc": "240203#02",
+        "lon": 404300.2,
+        "lat": 419410.465
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          404300.19999912067,
+          419410.4654385498,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "영덕군(대지리)",
+        "desc": "240203#03",
+        "lon": 407105.411,
+        "lat": 424196.89
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          407105.4106575203,
+          424196.8900684817,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "소서천합류전",
+        "desc": "240203#04",
+        "lon": 406042.288,
+        "lat": 426947.929
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          406042.2879679584,
+          426947.9291096291,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "용덕천합류전",
+        "desc": "240203#05",
+        "lon": 404874.045,
+        "lat": 426796.791
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          404874.0452648627,
+          426796.7905236501,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "용덕천",
+        "desc": "240203#06",
+        "lon": 404846.937,
+        "lat": 426888.695
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          404846.9365795039,
+          426888.69466429215,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "소서천",
+        "desc": "240203#07",
+        "lon": 405666.313,
+        "lat": 427031.53
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          405666.31331296987,
+          427031.5297330884,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "대서천",
+        "desc": "240203#08",
+        "lon": 406996.399,
+        "lat": 427711.086
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          406996.39916639787,
+          427711.08605609427,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "관동천합류전",
+        "desc": "240204#01",
+        "lon": 409211.273,
+        "lat": 428905.819
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          409211.2731299052,
+          428905.8194860199,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "관동천",
+        "desc": "240204#02",
+        "lon": 409129.821,
+        "lat": 429181.497
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          409129.8213833568,
+          429181.49736040423,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "영덕군(영덕대교)",
+        "desc": "240204#03",
+        "lon": 412938.142,
+        "lat": 425356.426
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          412938.1420879446,
+          425356.426258826,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "영덕오십천하류",
+        "desc": "240204#04",
+        "lon": 414504.316,
+        "lat": 420520.664
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414504.31604897697,
+          420520.6639592586,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "용연저수지",
+        "desc": "240207#01",
+        "lon": 407231.972,
+        "lat": 393690.937
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          407231.9721738391,
+          393690.9371745175,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "초곡천합류전",
+        "desc": "240208#01",
+        "lon": 413985.816,
+        "lat": 393853.563
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413985.81577870314,
+          393853.56296178524,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "초곡천",
+        "desc": "240208#02",
+        "lon": 414013.848,
+        "lat": 393730.852
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414013.8476844637,
+          393730.8521258807,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "곡강천",
+        "desc": "240208#03",
+        "lon": 416488.62,
+        "lat": 394871.498
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416488.62048345455,
+          394871.4981323069,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "진전천+3합류전",
+        "desc": "240302#02",
+        "lon": 416649.047,
+        "lat": 368036.684
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416649.04684188764,
+          368036.6840968404,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "진전천+3",
+        "desc": "240302#01",
+        "lon": 416623.958,
+        "lat": 368036.068
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416623.9583885139,
+          368036.0679733559,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "진전천+2합류후",
+        "desc": "240302#03",
+        "lon": 416492.463,
+        "lat": 368279.627
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416492.462872871,
+          368279.62741603283,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "진전천+1합류전",
+        "desc": "240302#04",
+        "lon": 416681.804,
+        "lat": 368747.004
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416681.8035545148,
+          368747.0042151271,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "진전천+1",
+        "desc": "240302#05",
+        "lon": 416756.305,
+        "lat": 368779.683
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416756.30514933844,
+          368779.6834974019,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "진전저수지",
+        "desc": "240302#06",
+        "lon": 416985.167,
+        "lat": 369679.921
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416985.1670631404,
+          369679.92142149864,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "은적천합류전",
+        "desc": "240302#07",
+        "lon": 416700.977,
+        "lat": 371030.271
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416700.9774594186,
+          371030.27070831205,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "은적천",
+        "desc": "240302#08",
+        "lon": 416802.056,
+        "lat": 371001.908
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416802.0556854585,
+          371001.90809872287,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "석낭지천합류전",
+        "desc": "240302#09",
+        "lon": 416615.948,
+        "lat": 372447.219
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416615.9476725692,
+          372447.2187238054,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "석낭지천",
+        "desc": "240302#10",
+        "lon": 416715.493,
+        "lat": 372480.516
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416715.492752551,
+          372480.51597977336,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "문충천합류전",
+        "desc": "240302#11",
+        "lon": 416633.486,
+        "lat": 373774.146
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416633.486359361,
+          373774.14580585714,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "문충천",
+        "desc": "240302#12",
+        "lon": 416582.584,
+        "lat": 373803.742
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416582.5837459404,
+          373803.742290193,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신광천합류전",
+        "desc": "240302#13",
+        "lon": 416691.249,
+        "lat": 374485.09
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416691.24856027134,
+          374485.08974657545,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "항사천",
+        "desc": "240302#17",
+        "lon": 414110.261,
+        "lat": 371275.427
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414110.2612394583,
+          371275.42709874245,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "항사천+",
+        "desc": "240302#16",
+        "lon": 414825.523,
+        "lat": 371786.407
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414825.5229478638,
+          371786.4068213365,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신광천+",
+        "desc": "240302#16",
+        "lon": 413755.81,
+        "lat": 372439.044
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413755.80968729313,
+          372439.04427713645,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "오어저수지",
+        "desc": "240302#18",
+        "lon": 414634.957,
+        "lat": 372398.726
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          414634.9569346187,
+          372398.7260687517,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "신광천",
+        "desc": "240302#19",
+        "lon": 416713.283,
+        "lat": 374609.028
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416713.2825278503,
+          374609.02751278935,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "용산천합류전",
+        "desc": "240302#20",
+        "lon": 417156.171,
+        "lat": 374959.281
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417156.171085609,
+          374959.2811894366,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "용산천",
+        "desc": "240302#21",
+        "lon": 417206.309,
+        "lat": 374960.518
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417206.30871148355,
+          374960.5183932486,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "포항시(문덕3교)",
+        "desc": "240302#22",
+        "lon": 417172.11,
+        "lat": 375329.862
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417172.1102800926,
+          375329.862236736,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "세계천합류전",
+        "desc": "240302#23",
+        "lon": 417477.326,
+        "lat": 377188.347
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417477.32600605814,
+          377188.3466028795,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "세계천",
+        "desc": "240302#24",
+        "lon": 417577.576,
+        "lat": 377190.826
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417577.5760240521,
+          377190.8261539681,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "원용교",
+        "desc": "240302#25",
+        "lon": 417304.855,
+        "lat": 378078.709
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417304.8554283265,
+          378078.7086236372,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "인덕교",
+        "desc": "240302#26",
+        "lon": 416779.327,
+        "lat": 379052.906
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416779.32694073336,
+          379052.9055324955,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "냉천교",
+        "desc": "240302#27",
+        "lon": 416556.077,
+        "lat": 379972.874
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          416556.0772553922,
+          379972.873837288,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "냉천",
+        "desc": "240302#28",
+        "lon": 417800.22,
+        "lat": 381361.0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417800.21997399203,
+          381360.9999528574,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "호암천합류전",
+        "desc": "240304#01",
+        "lon": 419444.563,
+        "lat": 358573.464
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          419444.5630711579,
+          358573.4644290641,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "호암천",
+        "desc": "240304#02",
+        "lon": 419542.731,
+        "lat": 358668.446
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          419542.7313392449,
+          358668.44550934434,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "용동천합류후",
+        "desc": "240304#03",
+        "lon": 419924.827,
+        "lat": 358461.992
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          419924.8269235847,
+          358461.9920469204,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "양북면(입천교)",
+        "desc": "240304#04",
+        "lon": 420549.892,
+        "lat": 357582.929
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          420549.8918154561,
+          357582.92908519076,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "양북면(두산대교)",
+        "desc": "240304#05",
+        "lon": 421363.556,
+        "lat": 355197.013
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          421363.5561482494,
+          355197.01301413076,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "양북면(구갈교)",
+        "desc": "240304#06",
+        "lon": 423023.573,
+        "lat": 353171.741
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          423023.57318721316,
+          353171.74074304086,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "대종천",
+        "desc": "240304#07",
+        "lon": 424577.684,
+        "lat": 352378.033
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          424577.684076195,
+          352378.0331820239,
+          0.0
+        ]
+      }
+    }
+  ]
 }

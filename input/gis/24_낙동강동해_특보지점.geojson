@@ -1,11 +1,80 @@
 {
-"type": "FeatureCollection",
-"name": "24_낙동강동해_특보지점",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::5186" } },
-"features": [
-{ "type": "Feature", "properties": { "Name": "울진군(월변교)", "desc": "240102#02", "lon": 413824.909, "lat": 490477.087 }, "geometry": { "type": "Point", "coordinates": [ 413824.908978924504481, 490477.087263755267486, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "울진군(수산교)", "desc": "240106#04", "lon": 413568.597, "lat": 487878.878 }, "geometry": { "type": "Point", "coordinates": [ 413568.596997836662922, 487878.878189589129761, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "영덕군(영덕대교)", "desc": "240204#03", "lon": 412938.142, "lat": 425356.426 }, "geometry": { "type": "Point", "coordinates": [ 412938.142087944608647, 425356.426258825988043, 0.0 ] } },
-{ "type": "Feature", "properties": { "Name": "포항시(문덕3교)", "desc": "240302#21", "lon": 417172.11, "lat": 375329.862 }, "geometry": { "type": "Point", "coordinates": [ 417172.110280092572793, 375329.862236735993065, 0.0 ] } }
-]
+  "type": "FeatureCollection",
+  "name": "24_낙동강동해_특보지점",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::5186"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "울진군(월변교)",
+        "desc": "240102#02",
+        "lon": 413824.909,
+        "lat": 490477.087
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413824.9089789245,
+          490477.08726375527,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "울진군(수산교)",
+        "desc": "240106#04",
+        "lon": 413568.597,
+        "lat": 487878.878
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          413568.59699783666,
+          487878.87818958913,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "영덕군(영덕대교)",
+        "desc": "240204#03",
+        "lon": 412938.142,
+        "lat": 425356.426
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          412938.1420879446,
+          425356.426258826,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Name": "포항시(문덕3교)",
+        "desc": "240302#22",
+        "lon": 417172.11,
+        "lat": 375329.862
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          417172.1102800926,
+          375329.862236736,
+          0.0
+        ]
+      }
+    }
+  ]
 }
