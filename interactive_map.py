@@ -448,13 +448,20 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
     try:
         html_str = net.generate_html()
         inject_html = """
-<button id="btn-fit" style="position: absolute; top: 10px; right: 10px; z-index: 9999; padding: 5px 10px; background-color: white; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">🔄 화면맞춤</button>
+<button id="btn-fit" style="position: absolute; top: 10px; right: 10px; z-index: 9999; background-color: white; border: 1px solid rgba(49, 51, 63, 0.2); border-radius: 0.5rem; padding: 0.25rem 0.75rem; color: rgb(49, 51, 63); font-family: 'Source Sans Pro', sans-serif; font-size: 14px; font-weight: 400; cursor: pointer; box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;">🔄 화면맞춤</button>
 <script type="text/javascript">
-document.getElementById('btn-fit').onclick = function(e) {
+var btn = document.getElementById('btn-fit');
+btn.onmouseover = function() {
+    btn.style.borderColor = 'rgb(255, 75, 75)';
+    btn.style.color = 'rgb(255, 75, 75)';
+};
+btn.onmouseout = function() {
+    btn.style.borderColor = 'rgba(49, 51, 63, 0.2)';
+    btn.style.color = 'rgb(49, 51, 63)';
+};
+btn.onclick = function(e) {
     e.stopPropagation();
-    if (typeof network !== 'undefined') {
-        network.fit({animation: {duration: 500, easingFunction: 'easeInOutQuad'}});
-    }
+    window.location.reload();
 };
 </script>
 """
@@ -735,27 +742,41 @@ with col_map:
 
                 var _map = {{ this._parent.get_name() }};
                 
-                var btn = document.createElement('button');
-                btn.innerHTML = '🔄 화면맞춤';
-                btn.style.position = 'absolute';
-                btn.style.top = '10px';
-                btn.style.right = '10px';
-                btn.style.zIndex = '9999';
-                btn.style.padding = '5px 10px';
-                btn.style.backgroundColor = 'white';
-                btn.style.border = '1px solid #ccc';
-                btn.style.borderRadius = '4px';
-                btn.style.cursor = 'pointer';
-                btn.style.fontWeight = 'bold';
-                btn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
-                
-                btn.onclick = function(e) {
-                    e.stopPropagation();
-                    _map.fitBounds(__BOUNDS_PLACEHOLDER__);
-                };
-                
-                var mapDiv = _map.getContainer();
-                mapDiv.appendChild(btn);
+                var FitControl = L.Control.extend({
+                    options: { position: 'topright' },
+                    onAdd: function (map) {
+                        var btn = L.DomUtil.create('button', 'fit-button');
+                        btn.innerHTML = '🔄 화면맞춤';
+                        btn.style.backgroundColor = 'white';
+                        btn.style.border = '1px solid rgba(49, 51, 63, 0.2)';
+                        btn.style.borderRadius = '0.5rem';
+                        btn.style.padding = '0.25rem 0.75rem';
+                        btn.style.color = 'rgb(49, 51, 63)';
+                        btn.style.fontFamily = '"Source Sans Pro", sans-serif';
+                        btn.style.fontSize = '14px';
+                        btn.style.fontWeight = '400';
+                        btn.style.cursor = 'pointer';
+                        btn.style.boxShadow = 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px';
+                        btn.style.margin = '10px';
+                        
+                        btn.onmouseover = function() {
+                            btn.style.borderColor = 'rgb(255, 75, 75)';
+                            btn.style.color = 'rgb(255, 75, 75)';
+                        };
+                        btn.onmouseout = function() {
+                            btn.style.borderColor = 'rgba(49, 51, 63, 0.2)';
+                            btn.style.color = 'rgb(49, 51, 63)';
+                        };
+                        
+                        L.DomEvent.disableClickPropagation(btn);
+                        L.DomEvent.on(btn, 'click', function (e) {
+                            var b = __BOUNDS_PLACEHOLDER__;
+                            if(b) map.fitBounds(b);
+                        });
+                        return btn;
+                    }
+                });
+                _map.addControl(new FitControl());
                 
                 _map.scrollWheelZoom.disable();
                 _map.getContainer().addEventListener('wheel', function(e) {
