@@ -779,6 +779,34 @@ with col_map:
             zoom_control=False,       # 확대/축소 버튼 숨기기
             attributionControl=False  # 기본 내장 attribution 숨기기
         )
+
+        if selected_node:
+            m.get_root().header.add_child(folium.Element("""
+            <style>
+            @keyframes selectedRingGlow {
+                0% {
+                    stroke-opacity: 0.18;
+                    stroke-width: 7px;
+                    filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.45));
+                }
+                100% {
+                    stroke-opacity: 0.48;
+                    stroke-width: 11px;
+                    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.95));
+                }
+            }
+            @keyframes selectedRingCore {
+                0% { stroke-opacity: 0.7; stroke-width: 2px; }
+                100% { stroke-opacity: 1; stroke-width: 4px; }
+            }
+            .selected-node-ring-glow {
+                animation: selectedRingGlow 1.1s ease-in-out infinite alternate;
+            }
+            .selected-node-ring-core {
+                animation: selectedRingCore 1.1s ease-in-out infinite alternate;
+            }
+            </style>
+            """))
         
         # Ctrl+휠 미세 줌: MacroElement로 지도 초기화 이후 JS 실행 보장
         from folium import MacroElement
@@ -1246,7 +1274,8 @@ with col_map:
                         weight=9,
                         opacity=0.25,
                         fill=False,
-                        interactive=False
+                        interactive=False,
+                        class_name="selected-node-ring-glow"
                     ).add_to(m)
                     folium.CircleMarker(
                         [lat, lng],
@@ -1255,7 +1284,8 @@ with col_map:
                         color="#facc15",
                         weight=3,
                         opacity=1.0,
-                        fill=False
+                        fill=False,
+                        class_name="selected-node-ring-core"
                     ).add_to(m)
         else:
             rendered_node_coords = {}
