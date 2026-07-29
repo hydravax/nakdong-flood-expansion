@@ -493,8 +493,8 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         inject_html = """
 <div id="btn-fit" style="
     position: absolute; 
-    top: 10px; 
-    right: 10px; 
+    top: 0;
+    right: 0;
     z-index: 9999; 
     background-color: white;
     border: 2px solid rgba(0,0,0,0.2);
@@ -518,6 +518,11 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
 </div>
 <script type="text/javascript">
 var btn = document.getElementById('btn-fit');
+var networkContainer = document.getElementById('mynetwork');
+if (networkContainer) {
+    networkContainer.style.position = 'relative';
+    networkContainer.appendChild(btn);
+}
 btn.onmouseover = function() {
     btn.style.backgroundColor = '#f4f4f4';
 };
