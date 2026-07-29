@@ -1198,46 +1198,11 @@ with col_map:
                     else:
                         불가_symbol = "●"
 
-                if is_sel:
-                    # 선택 지점은 노란색 네온 마커로 다른 지점과 명확히 구분
-                    icon_html = f"""
-                    <div style="
-                        width: 22px;
-                        height: 22px;
-                        background-color: #facc15;
-                        border-radius: 50%;
-                        border: 3px solid #111827;
-                        box-shadow:
-                            0 0 0 4px rgba(255,255,255,0.95),
-                            0 0 14px 7px rgba(250,204,21,0.85);
-                        animation: selectedPointPulse 1s infinite alternate;
-                    "></div>
-                    <style>
-                        @keyframes selectedPointPulse {{
-                            0% {{
-                                transform: scale(0.85);
-                                box-shadow: 0 0 0 3px rgba(255,255,255,0.9),
-                                            0 0 8px 4px rgba(250,204,21,0.6);
-                            }}
-                            100% {{
-                                transform: scale(1.18);
-                                box-shadow: 0 0 0 5px rgba(255,255,255,1),
-                                            0 0 20px 10px rgba(250,204,21,0.95);
-                            }}
-                        }}
-                    </style>
-                    """
-                    folium.Marker(
-                        [lat, lng],
-                        icon=folium.DivIcon(
-                            html=icon_html,
-                            icon_size=(22, 22),
-                            icon_anchor=(11, 11),
-                            class_name="selected-node-icon"
-                        ),
-                        tooltip=_point_tooltip(pt_name, pt_id, pt_type, "선택됨")
-                    ).add_to(m)
-                elif 불가_symbol:
+                point_tooltip = _point_tooltip(
+                    pt_name, pt_id, pt_type, "선택됨" if is_sel else None
+                )
+
+                if 불가_symbol:
                     # 재검토 지점: 원문자 DivIcon 마커
                     icon_sz = 22 if is_special else 15
                     font_sz = 12 if is_special else 9
@@ -1260,15 +1225,37 @@ with col_map:
                             icon_size=(icon_sz, icon_sz),
                             icon_anchor=(icon_sz//2, icon_sz//2)
                         ),
-                        tooltip=_point_tooltip(pt_name, pt_id, pt_type)
+                        tooltip=point_tooltip
                     ).add_to(m)
                 else:
                     folium.CircleMarker(
                         [lat, lng],
                         radius=sz,
-                        tooltip=_point_tooltip(pt_name, pt_id, pt_type),
+                        tooltip=point_tooltip,
                         color=bc, weight=wt,
                         fill=True, fill_color=fc, fill_opacity=1.0
+                    ).add_to(m)
+
+                if is_sel:
+                    # 원래 결과 마커를 유지하고 바깥쪽에 투명한 노란색 선택 링 추가
+                    base_radius = max(float(sz), icon_sz / 2 if 불가_symbol else 0)
+                    folium.CircleMarker(
+                        [lat, lng],
+                        radius=base_radius + 7,
+                        color="#facc15",
+                        weight=9,
+                        opacity=0.25,
+                        fill=False,
+                        interactive=False
+                    ).add_to(m)
+                    folium.CircleMarker(
+                        [lat, lng],
+                        radius=base_radius + 5,
+                        tooltip=point_tooltip,
+                        color="#facc15",
+                        weight=3,
+                        opacity=1.0,
+                        fill=False
                     ).add_to(m)
         else:
             rendered_node_coords = {}
