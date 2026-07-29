@@ -13,19 +13,13 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def _point_tooltip(point_name, point_id, point_type, status=None):
-    """지도 클릭 결과에서 지점 ID를 손실 없이 회수할 수 있는 툴팁."""
+    """지점 ID 포함 지도 툴팁 생성."""
     tooltip = f"{point_name} [{point_type}] · ID: {point_id}"
     return f"{tooltip} · {status}" if status else tooltip
 
 
 def _clicked_node_from_event(clicked_object, clicked_tooltip, rendered_node_coords):
-    """
-    마커 툴팁에 심은 ID와 클릭 좌표가 같은 지점을 가리킬 때만 ID를 반환한다.
-
-    streamlit-folium은 툴팁이 없는 폴리곤을 클릭하면 직전 툴팁 문자열을
-    유지할 수 있다. 따라서 ID뿐 아니라 해당 마커 좌표와의 오차(30m 이내)
-    도 함께 검증한다. 최근접 지점으로 대체하지는 않는다.
-    """
+    """마커 ID와 클릭 좌표 일치 여부 검증(30m 이내)."""
     if not isinstance(clicked_object, dict) or not isinstance(clicked_tooltip, str):
         return None
 
@@ -53,10 +47,7 @@ def _clicked_node_from_event(clicked_object, clicked_tooltip, rendered_node_coor
 
 
 def _calc_css_dims_from_zoom_bounds(sw_lat, sw_lng, ne_lat, ne_lng, zoom):
-    """
-    Streamlit st_folium의 zoom + bounds 에서 실제 CSS 픽셀 크기 역산.
-    (Leaflet 정확히 동일한 출력을 위해 사용)
-    """
+    """Leaflet 확대 수준·경계 기반 CSS 픽셀 크기 계산."""
     import math
     TILE_SIZE = 256
     tiles = TILE_SIZE * (2.0 ** zoom)
@@ -74,12 +65,7 @@ def _calc_css_dims_from_zoom_bounds(sw_lat, sw_lng, ne_lat, ne_lng, zoom):
 
 
 def get_high_res_tiff(m, dpi=(600, 600), bounds=None, zoom=None):
-    """
-    m: center/zoom/레이어가 세팅된 folium.Map 객체
-    - zoom+bounds 로 Streamlit 콘테이너의 정확한 CSS px 크기를 역산
-    - force-device-scale-factor=3으로 3배 해상도 캐트청
-    - CSS 픽셀 레이아웃은 유지 → 마커 크기 동일
-    """
+    """현재 지도 범위를 고해상도 TIFF 바이트로 변환."""
     import tempfile, time, io
     from PIL import Image
     from selenium import webdriver
@@ -1288,7 +1274,7 @@ with col_map:
             rendered_node_coords = {}
 
         def on_map_change():
-            """컴포넌트 재실행 전에 마커 선택을 세션 상태에 반영한다."""
+            """마커 선택 상태를 컴포넌트 재실행 전에 반영."""
             map_event = st.session_state.get("target_watershed_map", {})
             if not isinstance(map_event, dict):
                 return
