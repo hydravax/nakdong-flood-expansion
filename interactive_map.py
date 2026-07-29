@@ -836,6 +836,9 @@ with col_map:
                         btn.style.alignItems = 'center';
                         btn.style.gap = '5px';
                         btn.style.userSelect = 'none';
+                        // 위·오른쪽 좌표축(각 15px) 안쪽의 실제 지도 모서리에 정렬
+                        btn.style.marginTop = '15px';
+                        btn.style.marginRight = '15px';
                         
                         btn.onmouseover = function() {
                             btn.style.backgroundColor = '#f4f4f4';
