@@ -1,25 +1,56 @@
-# Ai홍수예보 5대 대권역 통합 상하류 네트워크 시각화 대시보드
+# 낙동강권역 홍수예보 체계 개선 시각화 대시보드
 
-## 1. 개요 (Overview)
-본 대시보드는 5대 주요 권역(낙동강, 낙동강동해, 태화강, 형산강, 회야수영강)의 복잡한 유역망 관계를 직관적으로 분석하고 시각화할 목적으로 개발된 **Streamlit** 기반의 로컬 웹 애플리케이션입니다.
-# 낙동강유역 홍수특보지점 검토 시각화
+낙동강권역 5개 유역(낙동강, 낙동강동해, 태화강, 형산강, 회야수영강)의 상·하류 연결 관계와 홍수특보 대상 지점을 지도와 유역 흐름도로 탐색하는 Streamlit 애플리케이션입니다.
 
-Streamlit 기반의 상호작용형 유역 지도 시각화 대시보드입니다.
+## 주요 기능
 
-## 폴더 구조 (Directory Structure)
-- `interactive_map.py`: Streamlit 앱 메인 실행 파일 (Streamlit Cloud 연동)
-- `input/`: 분석에 필요한 매개변수 파일 (.inf, .xlsx 등)
-  - `input/gis/`: 시각화에 필요한 공간 데이터 파일 (.geojson, .qmd 등)
-- `code/`: 추가 분석 스크립트 모음
-- `requirements.txt`: Python 패키지 의존성
-- `packages.txt`: Linux 시스템 패키지 (Chromium 등)
+- 유역별 또는 전체 권역 지도 조회
+- 특보지점·유역출구 선택 및 지점명/ID 통합 검색
+- 지도 지점 클릭 시 해당 지점과 상류 연결 유역 강조
+- 특보지점별 상류 유역 경계 표시
+- 시군구 행정구역 경계 표시 및 행정구역명 툴팁 제공
+- 국가하천·지방하천과 유역 경계 중첩 표시
+- 유역 흐름도에서 관측소의 유역면적, 관측소등급 표시
+- 흐름도 노드 툴팁에서 관측자료 유형과 하천명 확인
+- 현재 지도 화면을 고해상도 TIFF로 저장
 
-## 실행 방법 (로컬)
-```bash
-pip install -r requirements.txt
-streamlit run interactive_map.py
-```
+> **매개변수 최적화 수행결과**와 **카테고리별 분류 (성능비교)** 지도 옵션은 현재 화면에서 숨겨져 있으며, 관련 구현은 추후 다시 사용할 수 있도록 코드에 유지되어 있습니다.
 
-## 실행 방법 (Streamlit Cloud)
-1. GitHub 저장소를 Streamlit Cloud에 연결합니다.
-2. Main file path를 `interactive_map.py`로 지정하여 배포합니다.
+## 입력 자료
+
+- **input/30_subbasin_*.inf**: 유역 상·하류 연결 정보
+- **input/gis/유역도_*.geojson**: 유역 공간정보
+- **input/gis/*_특보지점.geojson**: 홍수특보 지점
+- **input/gis/*_유역출구.geojson**: 유역출구 지점
+- **input/gis/낙동강_국가하천.geojson**, **낙동강_지방하천.geojson**: 하천망
+- **input/gis/SGG_korea/SGG_korea.shp**: 시군구 행정구역 경계
+- **input/1.강수량관측소 일람표_낙동강(2025).xlsx**: 강수량관측소 등급 정보
+- **input/2.수위관측소 일람표_낙동강(2025).xlsx**: 수위관측소 유역면적·등급·하천 정보
+
+수위관측소 자료를 우선 사용하고, 일치하는 수위관측소 자료가 없을 때 강수량관측소 등급을 보완 정보로 사용합니다. 관측소 일람표와 지점명이 일치하지 않는 내부 유역 노드는 흐름도에 **자료 없음**으로 표시됩니다.
+
+## 폴더 구조
+
+- **interactive_map.py**: Streamlit 앱 메인 파일
+- **input/**: 유역 연결 및 관측소 입력 자료
+- **input/gis/**: 유역·지점·하천·행정구역 공간자료
+- **requirements.txt**: Python 패키지 의존성
+- **packages.txt**: Streamlit Cloud용 Linux 시스템 패키지
+
+## 로컬 실행
+
+    git clone https://github.com/hydravax/nakdong-flood-expansion.git
+    cd nakdong-flood-expansion
+    git lfs pull
+    pip install -r requirements.txt
+    streamlit run interactive_map.py
+
+행정구역 SHP 파일은 GitHub의 일반 파일 크기 제한을 초과하여 Git LFS로 관리됩니다. 저장소를 내려받을 때 [Git LFS](https://git-lfs.com/)가 설치되어 있어야 합니다.
+
+## Streamlit Community Cloud 배포
+
+1. GitHub 저장소를 Streamlit Community Cloud에 연결합니다.
+2. Main file path를 **interactive_map.py**로 지정합니다.
+3. 배포 환경에서 Git LFS 파일이 정상적으로 내려받아졌는지 확인합니다.
+
+앱 실행 후 왼쪽 설정 영역의 **행정구역 경계**를 선택하면 현재 유역 주변의 시군구 경계가 지도에 표시됩니다.
