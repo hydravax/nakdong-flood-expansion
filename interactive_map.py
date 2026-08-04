@@ -230,6 +230,44 @@ WS_COLORS = {
     "낙동강": "#93c5fd", "낙동강동해": "#6ee7b7", "태화강": "#fde047",
     "형산강": "#c4b5fd", "회야수영강": "#f9a8d4", "기타": "#d1d5db"
 }
+GRADE_COLORS = {
+    "최적(A)": "#16a34a",
+    "우수(B)": "#2563eb",
+    "보통(C)": "#f59e0b",
+    "없음": "#94a3b8",
+}
+GRADE_NODE_STYLES = {
+    "최적(A)": ("#dcfce7", "#16a34a", "#166534"),
+    "우수(B)": ("#dbeafe", "#2563eb", "#1e40af"),
+    "보통(C)": ("#fef3c7", "#f59e0b", "#b45309"),
+    "없음": ("#f1f5f9", "#94a3b8", "#475569"),
+}
+
+
+def _station_grade_category(grade):
+    """관측소 등급 원문을 지도 범례의 네 범주로 정규화."""
+    value = str(grade or "").strip().upper()
+    if "최적" in value or "(A)" in value:
+        return "최적(A)"
+    if "우수" in value or "(B)" in value:
+        return "우수(B)"
+    if "보통" in value or "(C)" in value:
+        return "보통(C)"
+    return "없음"
+
+
+def _count_station_grades(points, station_info):
+    """중복 지점을 제외하고 관측소 등급별 개수를 계산."""
+    counts = {grade: 0 for grade in GRADE_COLORS}
+    if points is None or points.empty:
+        return counts
+    unique_points = points.drop_duplicates(subset=["desc"])
+    for point_name in unique_points["Name"]:
+        point_info = station_info.get(_normalize_station_name(point_name), {})
+        grade_category = _station_grade_category(point_info.get("grade"))
+        counts[grade_category] += 1
+    return counts
+
 
 @st.cache_data
 def load_all_data():
@@ -548,6 +586,9 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
                 bg_col, brd_col, fnt_col = "#fee2e2", "#ef4444", "#b91c1c"
             else:
                 bg_col, brd_col, fnt_col = "#f1f5f9", "#94a3b8", "#475569"
+        elif map_mode == "등급별 분류":
+            grade_category = _station_grade_category(info.get("grade"))
+            bg_col, brd_col, fnt_col = GRADE_NODE_STYLES[grade_category]
         else:
             if is_sp:
                 bg_col, brd_col, fnt_col = "#fecaca", "#b91c1c", "#b91c1c"
@@ -767,7 +808,9 @@ with col_side:
     # --- 지도 표시 옵션 & 동적 범례 렌더링 ---
     st.divider()
     # 분석 결과 모드는 추후 다시 활성화할 수 있도록 관련 구현은 유지하고 선택지만 숨김.
-    map_mode = st.radio("지도 표시 옵션", ["기본 (특보/일반 지점)"])
+    map_mode = st.radio(
+        "지도 표시 옵션", ["기본 (특보/일반 지점)", "등급별 분류"]
+    )
     show_all_sp_bounds = st.checkbox("특보지점 유역 경계", value=False)
     show_admin_boundaries = st.checkbox("행정구역 경계", value=False)
     if show_admin_boundaries and st.session_state.get("selected_admin"):
@@ -782,6 +825,14 @@ with col_side:
         unique_pts = disp_pts["desc"].unique()
     else:
         unique_pts = []
+
+    summary_grade_points = (
+        active_pts
+        if active_pts is not None and not active_pts.empty
+        else disp_pts
+    )
+    grade_counts = _count_station_grades(summary_grade_points, station_info)
+    map_grade_counts = _count_station_grades(disp_pts, station_info)
 
     sp_cnt = sum(1 for pt_id in unique_pts if pt_id in special_nodes)
     gen_cnt = len(unique_pts) - sp_cnt
@@ -830,27 +881,60 @@ with col_side:
         # 타겟 노드 요약 정보 표시
         if selected_node:
             nm = node_metadata.get(selected_node, selected_node)
-            tgt_cat = str(perf_dict.get(nm, "일반지점")).strip()
-            cat_emoji = "⚫"
-            if tgt_cat == "개선": cat_emoji = "🟢"
-            elif tgt_cat == "부분개선": cat_emoji = "🟡"
-            elif tgt_cat == "변화없음": cat_emoji = "🟣"
-            elif tgt_cat.startswith("불가"): cat_emoji = "🔴"
-            
-            is_opt = opt_dict.get(selected_node, False)
-            opt_str = "🟢최적화" if is_opt else "⚪기본값"
-            
-            st.info(
-                f"**📌 [{nm}] 지점 요약**\n\n"
-                f"**• 성능:** {cat_emoji} {tgt_cat} | **• 매개변수:** {opt_str}\n\n"
-                f"**• 상류 지점 (총 {len(unique_pts)}개)** 중 최적화 완료: **{opt_cnt}개** (기본값: {unopt_cnt}개)"
-            )
+            if map_mode == "등급별 분류":
+                target_info = station_info.get(_normalize_station_name(nm), {})
+                target_grade = _station_grade_category(target_info.get("grade"))
+                grade_emoji = {
+                    "최적(A)": "🟢",
+                    "우수(B)": "🔵",
+                    "보통(C)": "🟠",
+                    "없음": "⚪",
+                }[target_grade]
+                st.info(
+                    f"**📌 [{nm}] 지점 요약**\n\n"
+                    f"**• 등급:** {grade_emoji} {target_grade}\n\n"
+                    f"**• 상류 지점 (총 {len(unique_pts)}개):** "
+                    f"최적 {grade_counts['최적(A)']}개 · "
+                    f"우수 {grade_counts['우수(B)']}개 · "
+                    f"보통 {grade_counts['보통(C)']}개 · "
+                    f"없음 {grade_counts['없음']}개"
+                )
+            else:
+                tgt_cat = str(perf_dict.get(nm, "일반지점")).strip()
+                cat_emoji = "⚫"
+                if tgt_cat == "개선": cat_emoji = "🟢"
+                elif tgt_cat == "부분개선": cat_emoji = "🟡"
+                elif tgt_cat == "변화없음": cat_emoji = "🟣"
+                elif tgt_cat.startswith("불가"): cat_emoji = "🔴"
+
+                is_opt = opt_dict.get(selected_node, False)
+                opt_str = "🟢최적화" if is_opt else "⚪기본값"
+
+                st.info(
+                    f"**📌 [{nm}] 지점 요약**\n\n"
+                    f"**• 성능:** {cat_emoji} {tgt_cat} | "
+                    f"**• 매개변수:** {opt_str}\n\n"
+                    f"**• 상류 지점 (총 {len(unique_pts)}개)** 중 "
+                    f"최적화 완료: **{opt_cnt}개** (기본값: {unopt_cnt}개)"
+                )
     else:
         cat_counts = {"개선": 0, "부분개선": 0, "변화없음": 0, "재검토_1수위유량": 0, "재검토_2이상치": 0, "재검토_3본류": 0, "재검토_4조석": 0, "재검토_5댐보": 0, "재검토_기타": 0, "일반_최적화": 0, "일반_기본값": 0}
 
     # 범례 (옵션별로 항상 표시)
     if map_mode == "기본 (특보/일반 지점)":
         st.markdown(f"🔴 특보지점 ({sp_cnt}개)<br>⚫ 일반지점 ({gen_cnt}개)", unsafe_allow_html=True)
+    elif map_mode == "등급별 분류":
+        st.markdown(
+            f"<span style='color:{GRADE_COLORS['최적(A)']}'>●</span> "
+            f"최적(A) ({map_grade_counts['최적(A)']}개)<br>"
+            f"<span style='color:{GRADE_COLORS['우수(B)']}'>●</span> "
+            f"우수(B) ({map_grade_counts['우수(B)']}개)<br>"
+            f"<span style='color:{GRADE_COLORS['보통(C)']}'>●</span> "
+            f"보통(C) ({map_grade_counts['보통(C)']}개)<br>"
+            f"<span style='color:{GRADE_COLORS['없음']}'>●</span> "
+            f"없음 ({map_grade_counts['없음']}개)",
+            unsafe_allow_html=True,
+        )
     elif map_mode == "매개변수 최적화 수행결과":
         st.markdown(
             f"🟢 최적화 수행 지점 ({opt_cnt}개) | <span style='font-size:13px;color:#666'>특보 {opt_sp_cnt}개 포함</span><br>"
@@ -1235,12 +1319,13 @@ with col_map:
                     short_name = full_name.split()[-1]
                     is_selected = full_name == selected_admin
                     label_color = "#047857" if is_selected else "#15803d"
-                    font_size = 13 if is_selected else 11
+                    selected_text = "true" if is_selected else "false"
                     label_html = (
-                        f"<div style='transform:translate(-50%,-50%);"
-                        f"color:{label_color};font-size:{font_size}px;"
-                        "font-weight:800;opacity:1;white-space:nowrap;"
-                        "pointer-events:none;text-shadow:"
+                        f"<div class='admin-area-label' "
+                        f"data-selected='{selected_text}' style='"
+                        "transform:translate(-50%,-50%);font-size:11px;"
+                        f"color:{label_color};font-weight:800;opacity:1;"
+                        "white-space:nowrap;pointer-events:none;text-shadow:"
                         "-1px -1px 0 white,1px -1px 0 white,"
                         "-1px 1px 0 white,1px 1px 0 white;'>"
                         f"{short_name}</div>"
@@ -1250,6 +1335,34 @@ with col_map:
                         icon=folium.DivIcon(html=label_html),
                         interactive=False,
                     ).add_to(m)
+
+                # 줌 수준에 맞춰 행정구역명 글자 크기를 연속적으로 조정
+                admin_label_zoom = MacroElement()
+                admin_label_zoom._template = Template("""
+                    {% macro script(this, kwargs) %}
+                    (function() {
+                        var labelMap = {{ this._parent.get_name() }};
+                        function resizeAdminLabels() {
+                            var currentZoom = labelMap.getZoom();
+                            var baseSize = Math.max(
+                                8, Math.min(18, 4 + currentZoom * 0.9)
+                            );
+                            var labels = labelMap.getContainer()
+                                .querySelectorAll('.admin-area-label');
+                            labels.forEach(function(label) {
+                                var selectedBonus =
+                                    label.getAttribute('data-selected') === 'true'
+                                    ? 2 : 0;
+                                label.style.fontSize =
+                                    (baseSize + selectedBonus) + 'px';
+                            });
+                        }
+                        labelMap.on('zoom zoomend', resizeAdminLabels);
+                        setTimeout(resizeAdminLabels, 0);
+                    })();
+                    {% endmacro %}
+                """)
+                m.add_child(admin_label_zoom)
         
         # (2) 현재 선택된 유역(들)의 최외곽 경계선 (두꺼운 테두리)
         watershed_bound_gdf = get_watershed_boundary(disp_basins, selected_ws)
@@ -1385,6 +1498,8 @@ with col_map:
                 is_opt = opt_dict.get(pt_id, False) if map_mode != "기본 (특보/일반 지점)" else False
                 cat = perf_dict.get(pt_name, "일반지점") if map_mode == "카테고리별 분류 (성능비교)" else None
                 note = reason_dict.get(pt_name, "") if map_mode == "카테고리별 분류 (성능비교)" else None
+                point_info = station_info.get(_normalize_station_name(pt_name), {})
+                grade_category = _station_grade_category(point_info.get("grade"))
 
                 # Set default styles
                 bc, sz, wt, fc = "black", 3, 1, "black"
@@ -1411,6 +1526,12 @@ with col_map:
                             bc, sz, wt, fc = ("black" if is_special else "#16a34a"), sz_gen, 1.5, "#16a34a"  # 최적화
                         else:
                             bc, sz, wt, fc = ("black" if is_special else "#f97316"), sz_gen, 1.5, "#f97316"  # 기본값
+                elif map_mode == "등급별 분류":
+                    grade_color = GRADE_COLORS[grade_category]
+                    sz = 7 if is_special else (5 if grade_category != "없음" else 3.5)
+                    bc = "black" if is_special else grade_color
+                    wt = 1.5 if is_special else 2
+                    fc = grade_color
                 else: # 기본
                     if is_special:
                         bc, sz, wt, fc = "black", 5, 1.5, "red"
@@ -1434,8 +1555,14 @@ with col_map:
                     else:
                         불가_symbol = "●"
 
+                tooltip_status = []
+                if map_mode == "등급별 분류":
+                    tooltip_status.append(f"등급: {grade_category}")
+                if is_sel:
+                    tooltip_status.append("선택됨")
                 point_tooltip = _point_tooltip(
-                    pt_name, pt_id, pt_type, "선택됨" if is_sel else None
+                    pt_name, pt_id, pt_type,
+                    " · ".join(tooltip_status) if tooltip_status else None,
                 )
 
                 if 불가_symbol:
