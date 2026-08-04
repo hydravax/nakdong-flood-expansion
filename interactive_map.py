@@ -399,7 +399,7 @@ def load_station_metadata():
 
 def _format_drainage_area(value):
     if value is None or pd.isna(value):
-        return "자료 없음"
+        return "-"
     try:
         number = float(value)
         return f"{number:,.2f}".rstrip("0").rstrip(".") + " ㎢"
@@ -509,18 +509,28 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         elif cat.startswith("불가"): cat_emoji = "🔴"
         
         info = station_info.get(_normalize_station_name(lbl), {})
-        area_str = _format_drainage_area(info.get("drainage_area"))
-        grade_str = info.get("grade") or "자료 없음"
-        station_type = info.get("station_type") or "-"
-        river = info.get("river") or "-"
-
         sp_str = "🔴특보" if is_sp else "⚫일반"
-        display_label = f"{lbl}\n{sp_str}\n──────\n유역면적 {area_str}\n관측소등급 {grade_str}"
-        tooltip_text = (
-            f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}"
-            f"\n관측자료: {station_type}\n하천명: {river}"
-            f"\n유역면적: {area_str}\n관측소등급: {grade_str}"
-        )
+
+        if info:
+            area_str = _format_drainage_area(info.get("drainage_area"))
+            grade_str = info.get("grade") or "-"
+            station_type = info.get("station_type") or "-"
+            river = info.get("river") or "-"
+            display_label = (
+                f"{lbl}\n{sp_str}\n──────"
+                f"\n유역면적 : {area_str}\n등급 : {grade_str}"
+            )
+            tooltip_text = (
+                f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}"
+                f"\n관측자료: {station_type}\n하천명: {river}"
+                f"\n유역면적 : {area_str}\n등급 : {grade_str}"
+            )
+        else:
+            display_label = f"{lbl}\n{sp_str}\n──────\n관측자료 없음"
+            tooltip_text = (
+                f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}"
+                "\n관측자료 없음"
+            )
         
         if map_mode == "매개변수 최적화 수행결과":
             if is_opt:
@@ -639,7 +649,7 @@ perf_dict, reason_dict = load_performance_data()
 for _k, _v in [
     ("sp_box_key", "선택 없음"), ("out_box_key", "선택 없음"),
     ("search_query", ""), ("map_clicked_node", None),
-    ("_last_marker_click", None),
+    ("_last_marker_click", None), ("selected_admin", None),
     ("_reset_widgets", False)
 ]:
     if _k not in st.session_state:
@@ -660,7 +670,13 @@ with col_side:
     st.subheader("설정")
 
     ws_choices = ["전체", "낙동강", "낙동강동해", "태화강", "형산강", "회야수영강"]
-    selected_ws = st.selectbox("유역 선택", ws_choices, index=1)
+
+    def cb_watershed():
+        st.session_state["selected_admin"] = None
+
+    selected_ws = st.selectbox(
+        "유역 선택", ws_choices, index=1, on_change=cb_watershed
+    )
 
     if selected_ws == "전체":
         disp_basins = gdf_all_basins
@@ -754,6 +770,8 @@ with col_side:
     map_mode = st.radio("지도 표시 옵션", ["기본 (특보/일반 지점)"])
     show_all_sp_bounds = st.checkbox("특보지점 유역 경계", value=False)
     show_admin_boundaries = st.checkbox("행정구역 경계", value=False)
+    if show_admin_boundaries and st.session_state.get("selected_admin"):
+        st.caption(f"선택 행정구역: {st.session_state['selected_admin']}")
     active_pts = disp_pts
     if selected_node and len(upstream_set) > 0 and disp_pts is not None:
         active_pts = disp_pts[disp_pts["desc"].isin(upstream_set)]
@@ -1147,11 +1165,52 @@ with col_map:
             interactive=False
         ).add_to(m)
 
-        # 시군구 행정구역 경계(선택된 유역 주변만 추려 렌더링)
+        # 선택 유역과 실제로 겹치는 시군구 폴리곤만 지도에 표시
+        visible_admin = None
         if show_admin_boundaries and admin_boundaries is not None and not admin_boundaries.empty:
-            minx, miny, maxx, maxy = disp_basins.total_bounds
-            visible_admin = admin_boundaries.cx[minx:maxx, miny:maxy]
+            if hasattr(disp_basins.geometry, "union_all"):
+                watershed_geom = disp_basins.geometry.union_all()
+            else:
+                watershed_geom = disp_basins.geometry.unary_union
+            visible_admin = admin_boundaries[
+                admin_boundaries.geometry.intersects(watershed_geom)
+            ].copy()
+
             if not visible_admin.empty:
+                selected_admin = st.session_state.get("selected_admin")
+
+                def admin_style(feature):
+                    is_selected = (
+                        feature["properties"].get("SGG_NM") == selected_admin
+                    )
+                    if is_selected:
+                        return {
+                            "fillColor": "#22c55e",
+                            "fillOpacity": 0.22,
+                            "color": "#047857",
+                            "weight": 4,
+                            "opacity": 1.0,
+                            "dashArray": "",
+                        }
+                    return {
+                        "fillOpacity": 0,
+                        "color": "#16a34a",
+                        "weight": 1.2,
+                        "opacity": 0.95,
+                        "dashArray": "5, 4",
+                    }
+
+                def admin_highlight(feature):
+                    is_selected = (
+                        feature["properties"].get("SGG_NM") == selected_admin
+                    )
+                    return {
+                        "fillColor": "#22c55e",
+                        "fillOpacity": 0.30 if is_selected else 0.14,
+                        "color": "#047857" if is_selected else "#15803d",
+                        "weight": 5 if is_selected else 3,
+                    }
+
                 admin_tooltip = None
                 if "SGG_NM" in visible_admin.columns:
                     admin_tooltip = folium.GeoJsonTooltip(
@@ -1159,16 +1218,38 @@ with col_map:
                     )
                 folium.GeoJson(
                     visible_admin.to_json(),
-                    style_function=lambda x: {
-                        "fillOpacity": 0,
-                        "color": "#475569",
-                        "weight": 1.1,
-                        "opacity": 0.85,
-                        "dashArray": "5, 4",
-                    },
+                    style_function=admin_style,
+                    highlight_function=admin_highlight,
                     name="행정구역 경계",
                     tooltip=admin_tooltip,
                 ).add_to(m)
+
+                # 각 행정구역 폴리곤 내부 대표 지점에 시·군·구명 표시
+                admin_labels = visible_admin[["SGG_NM", "geometry"]].to_crs(
+                    epsg=5179
+                )
+                admin_labels.geometry = admin_labels.geometry.representative_point()
+                admin_labels = admin_labels.to_crs(epsg=4326)
+                for _, admin_row in admin_labels.iterrows():
+                    full_name = str(admin_row["SGG_NM"]).strip()
+                    short_name = full_name.split()[-1]
+                    is_selected = full_name == selected_admin
+                    label_color = "#047857" if is_selected else "#15803d"
+                    font_size = 13 if is_selected else 11
+                    label_html = (
+                        f"<div style='transform:translate(-50%,-50%);"
+                        f"color:{label_color};font-size:{font_size}px;"
+                        "font-weight:800;opacity:1;white-space:nowrap;"
+                        "pointer-events:none;text-shadow:"
+                        "-1px -1px 0 white,1px -1px 0 white,"
+                        "-1px 1px 0 white,1px 1px 0 white;'>"
+                        f"{short_name}</div>"
+                    )
+                    folium.Marker(
+                        [admin_row.geometry.y, admin_row.geometry.x],
+                        icon=folium.DivIcon(html=label_html),
+                        interactive=False,
+                    ).add_to(m)
         
         # (2) 현재 선택된 유역(들)의 최외곽 경계선 (두꺼운 테두리)
         watershed_bound_gdf = get_watershed_boundary(disp_basins, selected_ws)
@@ -1418,7 +1499,7 @@ with col_map:
             rendered_node_coords = {}
 
         def on_map_change():
-            """마커 선택 상태를 컴포넌트 재실행 전에 반영."""
+            """마커·행정구역 선택 상태를 컴포넌트 재실행 전에 반영."""
             map_event = st.session_state.get("target_watershed_map", {})
             if not isinstance(map_event, dict):
                 return
@@ -1428,30 +1509,47 @@ with col_map:
             clicked_id = _clicked_node_from_event(
                 clicked_object, clicked_tooltip, rendered_node_coords
             )
-            if not clicked_id:
+            if clicked_id:
+                click_signature = (
+                    clicked_id,
+                    clicked_object.get("lat"),
+                    clicked_object.get("lng"),
+                )
+                if click_signature == st.session_state.get("_last_marker_click"):
+                    return
+
+                st.session_state["_last_marker_click"] = click_signature
+                st.session_state["map_clicked_node"] = clicked_id
+                st.session_state["_reset_widgets"] = True
+
+                marker_lat, marker_lng = rendered_node_coords[clicked_id]
+                st.session_state["map_center"] = [marker_lat, marker_lng]
+                st.session_state["map_zoom"] = 12
+                st.session_state["fly_to_target"] = {
+                    "center": [marker_lat, marker_lng],
+                    "zoom": 12
+                }
                 return
 
-            click_signature = (
-                clicked_id,
-                clicked_object.get("lat"),
-                clicked_object.get("lng"),
-            )
-            if click_signature == st.session_state.get("_last_marker_click"):
-                return
+            # 행정구역 GeoJSON 클릭 시 실제 폴리곤 이름을 선택 상태로 저장
+            if (
+                show_admin_boundaries
+                and isinstance(clicked_tooltip, str)
+                and visible_admin is not None
+                and not visible_admin.empty
+            ):
+                plain_tooltip = re.sub(r"<[^>]+>", " ", clicked_tooltip)
+                plain_tooltip = re.sub(r"\s+", " ", plain_tooltip).strip()
+                admin_match = re.search(r"행정구역:\s*(.+?)\s*$", plain_tooltip)
+                if admin_match:
+                    admin_name = admin_match.group(1).strip()
+                    valid_names = set(
+                        visible_admin["SGG_NM"].dropna().astype(str).str.strip()
+                    )
+                    if admin_name in valid_names:
+                        st.session_state["selected_admin"] = admin_name
 
-            st.session_state["_last_marker_click"] = click_signature
-            st.session_state["map_clicked_node"] = clicked_id
-            st.session_state["_reset_widgets"] = True
-
-            marker_lat, marker_lng = rendered_node_coords[clicked_id]
-            st.session_state["map_center"] = [marker_lat, marker_lng]
-            st.session_state["map_zoom"] = 12
-            st.session_state["fly_to_target"] = {
-                "center": [marker_lat, marker_lng],
-                "zoom": 12
-            }
-
-        # 지도 바탕(last_clicked)이 아닌 ID가 포함된 마커 클릭만 선택으로 처리한다.
+        # 마커 또는 행정구역 폴리곤 클릭만 선택 이벤트로 처리한다.
         st_data = st_folium(
             m, use_container_width=True, height=1000,
             returned_objects=[
