@@ -316,6 +316,97 @@ def load_rivers():
     return rivers
 
 
+@st.cache_data
+def load_admin_boundaries():
+    """시군구 행정구역 경계를 지도 표시용으로 로드."""
+    shp_path = os.path.join(DATA_DIR, "gis", "SGG_korea", "SGG_korea.shp")
+    if not os.path.exists(shp_path):
+        return None
+
+    try:
+        gdf = gpd.read_file(shp_path)
+        if gdf.crs is None:
+            gdf = gdf.set_crs(epsg=4326)
+        gdf = gdf.to_crs(epsg=4326)
+        gdf.geometry = gdf.geometry.simplify(0.001)
+        return gdf
+    except Exception as e:
+        st.error(f"행정구역 경계 로드 오류: {e}")
+        return None
+
+
+def _normalize_station_name(value):
+    """자료 간 지점명 비교를 위해 공백을 제거."""
+    return re.sub(r"\s+", "", str(value).strip())
+
+
+def _clean_station_value(value):
+    if pd.isna(value) or str(value).strip().lower() in ("", "nan", "none"):
+        return None
+    return str(value).strip()
+
+
+@st.cache_data
+def load_station_metadata():
+    """수위·강수량 관측소 일람표에서 흐름도용 지점 정보를 로드."""
+    station_info = {}
+    stage_path = os.path.join(DATA_DIR, "2.수위관측소 일람표_낙동강(2025).xlsx")
+    rain_path = os.path.join(DATA_DIR, "1.강수량관측소 일람표_낙동강(2025).xlsx")
+
+    if os.path.exists(stage_path):
+        try:
+            df = pd.read_excel(stage_path, sheet_name="수위일람표", header=None, skiprows=6)
+            for _, row in df.iterrows():
+                name = _clean_station_value(row.iloc[2] if len(row) > 2 else None)
+                if not name:
+                    continue
+                station_info[_normalize_station_name(name)] = {
+                    "station_type": "수위",
+                    "watershed": _clean_station_value(row.iloc[4] if len(row) > 4 else None),
+                    "river": _clean_station_value(row.iloc[5] if len(row) > 5 else None),
+                    "drainage_area": row.iloc[19] if len(row) > 19 and pd.notna(row.iloc[19]) else None,
+                    "grade": _clean_station_value(row.iloc[21] if len(row) > 21 else None),
+                }
+        except Exception as e:
+            st.error(f"수위관측소 정보 로드 오류: {e}")
+
+    if os.path.exists(rain_path):
+        try:
+            df = pd.read_excel(
+                rain_path, sheet_name="강수량일람표(2022)", header=None, skiprows=8
+            )
+            for _, row in df.iterrows():
+                name = _clean_station_value(row.iloc[2] if len(row) > 2 else None)
+                if not name:
+                    continue
+                key = _normalize_station_name(name)
+                rain_info = {
+                    "station_type": "강수량",
+                    "watershed": _clean_station_value(row.iloc[4] if len(row) > 4 else None),
+                    "river": None,
+                    "drainage_area": None,
+                    "grade": _clean_station_value(row.iloc[12] if len(row) > 12 else None),
+                }
+                if key not in station_info:
+                    station_info[key] = rain_info
+                elif not station_info[key].get("grade"):
+                    station_info[key]["grade"] = rain_info["grade"]
+        except Exception as e:
+            st.error(f"강수량관측소 정보 로드 오류: {e}")
+
+    return station_info
+
+
+def _format_drainage_area(value):
+    if value is None or pd.isna(value):
+        return "자료 없음"
+    try:
+        number = float(value)
+        return f"{number:,.2f}".rstrip("0").rstrip(".") + " ㎢"
+    except (TypeError, ValueError):
+        return f"{value} ㎢"
+
+
 def get_all_upstream(target_node, upstream_map):
     visited = set()
 
@@ -379,7 +470,7 @@ def get_watershed_boundary(_disp_basins, selected_ws):
         
     return gpd.GeoDataFrame(geometry=[merged], crs=_disp_basins.crs)
 
-def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadata, special_nodes, map_mode, opt_dict, perf_dict):
+def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadata, special_nodes, map_mode, opt_dict, perf_dict, station_info):
     if not upstream_set:
         return None
 
@@ -409,7 +500,6 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         brd_wt = 1
         
         is_opt = opt_dict.get(n, False)
-        opt_str = "🟢최적화" if is_opt else "⚪기본값"
         
         cat = str(perf_dict.get(lbl, "일반지점")).strip()
         cat_emoji = "⚫"
@@ -418,9 +508,19 @@ def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadat
         elif cat == "변화없음": cat_emoji = "🟣"
         elif cat.startswith("불가"): cat_emoji = "🔴"
         
+        info = station_info.get(_normalize_station_name(lbl), {})
+        area_str = _format_drainage_area(info.get("drainage_area"))
+        grade_str = info.get("grade") or "자료 없음"
+        station_type = info.get("station_type") or "-"
+        river = info.get("river") or "-"
+
         sp_str = "🔴특보" if is_sp else "⚫일반"
-        display_label = f"{lbl}\n{sp_str}\n──────\n{opt_str} | {cat_emoji}{cat}"
-        tooltip_text = f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}\n매개변수: {'최적화 수행' if is_opt else '기본값 유지'}\n성능비교: {cat}"
+        display_label = f"{lbl}\n{sp_str}\n──────\n유역면적 {area_str}\n관측소등급 {grade_str}"
+        tooltip_text = (
+            f"지점명: {lbl}\n구분: {'특보지점' if is_sp else '일반지점'}"
+            f"\n관측자료: {station_type}\n하천명: {river}"
+            f"\n유역면적: {area_str}\n관측소등급: {grade_str}"
+        )
         
         if map_mode == "매개변수 최적화 수행결과":
             if is_opt:
@@ -530,6 +630,8 @@ btn.onclick = function(e) {
 # ── 데이터 로드 ──
 upstream_map, node_metadata, gdf_all_basins, gdf_all_pts, special_nodes = load_all_data()
 river_layers = load_rivers()
+admin_boundaries = load_admin_boundaries()
+station_info = load_station_metadata()
 opt_dict = load_optimization_data()
 perf_dict, reason_dict = load_performance_data()
 
@@ -648,8 +750,10 @@ with col_side:
 
     # --- 지도 표시 옵션 & 동적 범례 렌더링 ---
     st.divider()
-    map_mode = st.radio("지도 표시 옵션", ["기본 (특보/일반 지점)", "매개변수 최적화 수행결과", "카테고리별 분류 (성능비교)"])
+    # 분석 결과 모드는 추후 다시 활성화할 수 있도록 관련 구현은 유지하고 선택지만 숨김.
+    map_mode = st.radio("지도 표시 옵션", ["기본 (특보/일반 지점)"])
     show_all_sp_bounds = st.checkbox("특보지점 유역 경계", value=False)
+    show_admin_boundaries = st.checkbox("행정구역 경계", value=False)
     active_pts = disp_pts
     if selected_node and len(upstream_set) > 0 and disp_pts is not None:
         active_pts = disp_pts[disp_pts["desc"].isin(upstream_set)]
@@ -1042,6 +1146,29 @@ with col_map:
             style_function=style_fn,
             interactive=False
         ).add_to(m)
+
+        # 시군구 행정구역 경계(선택된 유역 주변만 추려 렌더링)
+        if show_admin_boundaries and admin_boundaries is not None and not admin_boundaries.empty:
+            minx, miny, maxx, maxy = disp_basins.total_bounds
+            visible_admin = admin_boundaries.cx[minx:maxx, miny:maxy]
+            if not visible_admin.empty:
+                admin_tooltip = None
+                if "SGG_NM" in visible_admin.columns:
+                    admin_tooltip = folium.GeoJsonTooltip(
+                        fields=["SGG_NM"], aliases=["행정구역:"]
+                    )
+                folium.GeoJson(
+                    visible_admin.to_json(),
+                    style_function=lambda x: {
+                        "fillOpacity": 0,
+                        "color": "#475569",
+                        "weight": 1.1,
+                        "opacity": 0.85,
+                        "dashArray": "5, 4",
+                    },
+                    name="행정구역 경계",
+                    tooltip=admin_tooltip,
+                ).add_to(m)
         
         # (2) 현재 선택된 유역(들)의 최외곽 경계선 (두꺼운 테두리)
         watershed_bound_gdf = get_watershed_boundary(disp_basins, selected_ws)
@@ -1400,7 +1527,7 @@ with col_graph:
         html_str = draw_network_flowchart(
             selected_node, frozenset(upstream_set),
             upstream_map, node_metadata, frozenset(special_nodes),
-            map_mode, opt_dict, perf_dict
+            map_mode, opt_dict, perf_dict, station_info
         )
         if html_str:
             components.html(html_str, height=1000, scrolling=False)

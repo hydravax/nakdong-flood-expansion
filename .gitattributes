@@ -1,0 +1,1 @@
+input/gis/SGG_korea/SGG_korea.shp filter=lfs diff=lfs merge=lfs -text
