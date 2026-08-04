@@ -2,7 +2,7 @@ import streamlit as st
 import geopandas as gpd
 import folium
 from streamlit_folium import st_folium
-import glob, os
+import glob, json, os
 import math
 import pandas as pd
 import re
@@ -149,7 +149,7 @@ def get_high_res_tiff(m, dpi=(600, 600), bounds=None, zoom=None):
 
 @st.cache_data
 def load_optimization_data():
-    f1 = os.path.join(CURRENT_DIR, '최종_매개변수_SFM1_유역_20_낙동강_r1.xlsx')
+    f1 = os.path.join(DATA_DIR, '최종_매개변수_SFM1_유역_20_낙동강_r1.xlsx')
     opt_dict = {}
     if os.path.exists(f1):
         try:
@@ -168,7 +168,7 @@ def load_optimization_data():
 
 @st.cache_data
 def load_performance_data():
-    f_list = [x for x in glob.glob(os.path.join(CURRENT_DIR, '*04.xlsx')) if not os.path.basename(x).startswith('~')]
+    f_list = [x for x in glob.glob(os.path.join(DATA_DIR, '*04.xlsx')) if not os.path.basename(x).startswith('~')]
     perf_dict = {}
     reason_dict = {}  # 불가 사유 (Note 콼럼)
     if f_list:
@@ -269,6 +269,32 @@ def _count_station_grades(points, station_info):
     return counts
 
 
+def _load_optimized_layer(file_name, fallback_path, assumed_crs=5186):
+    """경량 GeoJSON을 우선 사용하고 없으면 원본을 단순화해 로드."""
+    optimized_path = os.path.join(
+        DATA_DIR, "gis", "optimized", file_name
+    )
+    source_path = optimized_path if os.path.exists(optimized_path) else fallback_path
+    if not source_path or not os.path.exists(source_path):
+        return None
+
+    gdf = gpd.read_file(source_path)
+    if gdf.crs is None:
+        gdf = gdf.set_crs(epsg=assumed_crs)
+    gdf = gdf.to_crs(epsg=4326)
+    if source_path != optimized_path:
+        gdf.geometry = gdf.geometry.simplify(0.001)
+    return gdf
+
+
+@st.cache_data
+def _gdf_to_geojson(_gdf, cache_key):
+    """반복 렌더링에서 GeoDataFrame 직렬화를 재사용."""
+    if _gdf is None or _gdf.empty:
+        return None
+    return _gdf.to_json()
+
+
 @st.cache_data
 def load_all_data():
     # Cache invalidation trigger: 3
@@ -302,12 +328,11 @@ def load_all_data():
             glob.glob(os.path.join(GIS_DIR, f"*유역도_{ws}.geojson")) or
             glob.glob(os.path.join(GIS_DIR, f"유역도_{ws}.geojson"))
         )
-        if basin_files:
-            b = gpd.read_file(basin_files[0])
-            if b.crs is None:
-                b = b.set_crs(epsg=5186)
-            b = b.to_crs(epsg=4326)
-            b.geometry = b.geometry.simplify(0.001)
+        fallback_basin = basin_files[0] if basin_files else None
+        b = _load_optimized_layer(
+            f"유역도_{ws}.geojson", fallback_basin
+        )
+        if b is not None:
             b["watershed"] = ws
             gdf_basins_list.append(b)
 
@@ -343,13 +368,9 @@ def load_rivers():
     GIS_DIR = os.path.join(DATA_DIR, "gis")
     rivers = []
     for rfile in ["낙동강_국가하천.geojson", "낙동강_지방하천.geojson"]:
-        paths = glob.glob(os.path.join(GIS_DIR, rfile))
-        if paths:
-            gdf = gpd.read_file(paths[0])
-            if gdf.crs is None:
-                gdf = gdf.set_crs(epsg=5186)
-            gdf = gdf.to_crs(epsg=4326)
-            gdf.geometry = gdf.geometry.simplify(0.001)
+        fallback_path = os.path.join(GIS_DIR, rfile)
+        gdf = _load_optimized_layer(rfile, fallback_path)
+        if gdf is not None:
             rivers.append(gdf)
     return rivers
 
@@ -358,16 +379,10 @@ def load_rivers():
 def load_admin_boundaries():
     """시군구 행정구역 경계를 지도 표시용으로 로드."""
     shp_path = os.path.join(DATA_DIR, "gis", "SGG_korea", "SGG_korea.shp")
-    if not os.path.exists(shp_path):
-        return None
-
     try:
-        gdf = gpd.read_file(shp_path)
-        if gdf.crs is None:
-            gdf = gdf.set_crs(epsg=4326)
-        gdf = gdf.to_crs(epsg=4326)
-        gdf.geometry = gdf.geometry.simplify(0.001)
-        return gdf
+        return _load_optimized_layer(
+            "SGG_korea.geojson", shp_path, assumed_crs=4326
+        )
     except Exception as e:
         st.error(f"행정구역 경계 로드 오류: {e}")
         return None
@@ -387,6 +402,16 @@ def _clean_station_value(value):
 @st.cache_data
 def load_station_metadata():
     """수위·강수량 관측소 일람표에서 흐름도용 지점 정보를 로드."""
+    metadata_path = os.path.join(
+        DATA_DIR, "optimized", "station_metadata.json"
+    )
+    if os.path.exists(metadata_path):
+        try:
+            with open(metadata_path, encoding="utf-8") as file:
+                return json.load(file)
+        except (OSError, ValueError):
+            pass
+
     station_info = {}
     stage_path = os.path.join(DATA_DIR, "2.수위관측소 일람표_낙동강(2025).xlsx")
     rain_path = os.path.join(DATA_DIR, "1.강수량관측소 일람표_낙동강(2025).xlsx")
@@ -508,6 +533,35 @@ def get_watershed_boundary(_disp_basins, selected_ws):
         
     return gpd.GeoDataFrame(geometry=[merged], crs=_disp_basins.crs)
 
+
+@st.cache_data
+def get_visible_admin_layers(_admin_boundaries, _disp_basins, selected_ws):
+    """유역과 실제로 겹치는 행정구역 및 내부 라벨 지점을 캐시."""
+    if (
+        _admin_boundaries is None
+        or _admin_boundaries.empty
+        or _disp_basins is None
+        or _disp_basins.empty
+    ):
+        return None, None
+
+    if hasattr(_disp_basins.geometry, "union_all"):
+        watershed_geom = _disp_basins.geometry.union_all()
+    else:
+        watershed_geom = _disp_basins.geometry.unary_union
+    visible_admin = _admin_boundaries[
+        _admin_boundaries.geometry.intersects(watershed_geom)
+    ].copy()
+    if visible_admin.empty:
+        return visible_admin, None
+
+    admin_labels = visible_admin[["SGG_NM", "geometry"]].to_crs(epsg=5179)
+    admin_labels.geometry = admin_labels.geometry.representative_point()
+    admin_labels = admin_labels.to_crs(epsg=4326)
+    return visible_admin, admin_labels
+
+
+@st.cache_data(show_spinner=False)
 def draw_network_flowchart(target_node, upstream_set, upstream_map, node_metadata, special_nodes, map_mode, opt_dict, perf_dict, station_info):
     if not upstream_set:
         return None
@@ -681,10 +735,9 @@ btn.onclick = function(e) {
 # ── 데이터 로드 ──
 upstream_map, node_metadata, gdf_all_basins, gdf_all_pts, special_nodes = load_all_data()
 river_layers = load_rivers()
-admin_boundaries = load_admin_boundaries()
+admin_boundaries = None
 station_info = load_station_metadata()
-opt_dict = load_optimization_data()
-perf_dict, reason_dict = load_performance_data()
+opt_dict, perf_dict, reason_dict = {}, {}, {}
 
 # ── 세션 초기화 ──
 for _k, _v in [
@@ -811,8 +864,17 @@ with col_side:
     map_mode = st.radio(
         "지도 표시 옵션", ["기본 (특보/일반 지점)", "등급별 분류"]
     )
+
+    # 현재 선택된 모드에서만 숨겨둔 분석 자료를 지연 로드
+    if map_mode == "매개변수 최적화 수행결과":
+        opt_dict = load_optimization_data()
+    elif map_mode == "카테고리별 분류 (성능비교)":
+        opt_dict = load_optimization_data()
+        perf_dict, reason_dict = load_performance_data()
     show_all_sp_bounds = st.checkbox("특보지점 유역 경계", value=False)
     show_admin_boundaries = st.checkbox("행정구역 경계", value=False)
+    if show_admin_boundaries:
+        admin_boundaries = load_admin_boundaries()
     if show_admin_boundaries and st.session_state.get("selected_admin"):
         st.caption(f"선택 행정구역: {st.session_state['selected_admin']}")
     active_pts = disp_pts
@@ -826,38 +888,48 @@ with col_side:
     else:
         unique_pts = []
 
-    summary_grade_points = (
-        active_pts
-        if active_pts is not None and not active_pts.empty
-        else disp_pts
+    map_grade_counts = (
+        _count_station_grades(disp_pts, station_info)
+        if map_mode == "등급별 분류"
+        else {grade: 0 for grade in GRADE_COLORS}
     )
-    grade_counts = _count_station_grades(summary_grade_points, station_info)
-    map_grade_counts = _count_station_grades(disp_pts, station_info)
 
     sp_cnt = sum(1 for pt_id in unique_pts if pt_id in special_nodes)
     gen_cnt = len(unique_pts) - sp_cnt
-    opt_cnt = sum(1 for pt_id in unique_pts if opt_dict.get(pt_id, False))
-    unopt_cnt = len(unique_pts) - opt_cnt
-    opt_sp_cnt = sum(1 for pt_id in unique_pts if opt_dict.get(pt_id, False) and pt_id in special_nodes)
-    unopt_sp_cnt = sp_cnt - opt_sp_cnt
+    opt_cnt = unopt_cnt = opt_sp_cnt = unopt_sp_cnt = 0
+    if map_mode in (
+        "매개변수 최적화 수행결과",
+        "카테고리별 분류 (성능비교)",
+    ):
+        opt_cnt = sum(1 for pt_id in unique_pts if opt_dict.get(pt_id, False))
+        unopt_cnt = len(unique_pts) - opt_cnt
+        opt_sp_cnt = sum(
+            1 for pt_id in unique_pts
+            if opt_dict.get(pt_id, False) and pt_id in special_nodes
+        )
+        unopt_sp_cnt = sp_cnt - opt_sp_cnt
 
-    if active_pts is not None and not active_pts.empty:
-        unique_names = active_pts.drop_duplicates(subset=["desc"])[["Name","desc"]]
-        cat_counts = {
-            "개선": 0, "부분개선": 0, "변화없음": 0,
-            "재검토_1수위유량": 0, "재검토_2이상치": 0, "재검토_3본류": 0, "재검토_4조석": 0, "재검토_5댐보": 0, "재검토_기타": 0,
-            "일반_최적화": 0, "일반_기본값": 0
-        }
+    cat_counts = {
+        "개선": 0, "부분개선": 0, "변화없음": 0,
+        "재검토_1수위유량": 0, "재검토_2이상치": 0,
+        "재검토_3본류": 0, "재검토_4조석": 0,
+        "재검토_5댐보": 0, "재검토_기타": 0,
+        "일반_최적화": 0, "일반_기본값": 0,
+    }
+    if (
+        map_mode == "카테고리별 분류 (성능비교)"
+        and active_pts is not None
+        and not active_pts.empty
+    ):
+        unique_names = active_pts.drop_duplicates(
+            subset=["desc"]
+        )[["Name", "desc"]]
         for pt_name, pt_id in zip(unique_names["Name"], unique_names["desc"]):
             cat = perf_dict.get(pt_name, "일반지점").strip()
             note = reason_dict.get(pt_name, "")
             search_text = cat + " " + note
-            if cat == "개선":
-                cat_counts["개선"] += 1
-            elif cat == "부분개선":
-                cat_counts["부분개선"] += 1
-            elif cat == "변화없음":
-                cat_counts["변화없음"] += 1
+            if cat in ("개선", "부분개선", "변화없음"):
+                cat_counts[cat] += 1
             elif cat.startswith("불가") or cat.startswith("재검토"):
                 if "수위" in search_text or "유량" in search_text or "모형" in search_text:
                     cat_counts["재검토_1수위유량"] += 1
@@ -871,55 +943,10 @@ with col_side:
                     cat_counts["재검토_5댐보"] += 1
                 else:
                     cat_counts["재검토_기타"] += 1
+            elif opt_dict.get(pt_id, False):
+                cat_counts["일반_최적화"] += 1
             else:
-                is_opt = opt_dict.get(pt_id, False)
-                if is_opt:
-                    cat_counts["일반_최적화"] += 1
-                else:
-                    cat_counts["일반_기본값"] += 1
-                
-        # 타겟 노드 요약 정보 표시
-        if selected_node:
-            nm = node_metadata.get(selected_node, selected_node)
-            if map_mode == "등급별 분류":
-                target_info = station_info.get(_normalize_station_name(nm), {})
-                target_grade = _station_grade_category(target_info.get("grade"))
-                grade_emoji = {
-                    "최적(A)": "🟢",
-                    "우수(B)": "🔵",
-                    "보통(C)": "🟠",
-                    "없음": "⚪",
-                }[target_grade]
-                st.info(
-                    f"**📌 [{nm}] 지점 요약**\n\n"
-                    f"**• 등급:** {grade_emoji} {target_grade}\n\n"
-                    f"**• 상류 지점 (총 {len(unique_pts)}개):** "
-                    f"최적 {grade_counts['최적(A)']}개 · "
-                    f"우수 {grade_counts['우수(B)']}개 · "
-                    f"보통 {grade_counts['보통(C)']}개 · "
-                    f"없음 {grade_counts['없음']}개"
-                )
-            else:
-                tgt_cat = str(perf_dict.get(nm, "일반지점")).strip()
-                cat_emoji = "⚫"
-                if tgt_cat == "개선": cat_emoji = "🟢"
-                elif tgt_cat == "부분개선": cat_emoji = "🟡"
-                elif tgt_cat == "변화없음": cat_emoji = "🟣"
-                elif tgt_cat.startswith("불가"): cat_emoji = "🔴"
-
-                is_opt = opt_dict.get(selected_node, False)
-                opt_str = "🟢최적화" if is_opt else "⚪기본값"
-
-                st.info(
-                    f"**📌 [{nm}] 지점 요약**\n\n"
-                    f"**• 성능:** {cat_emoji} {tgt_cat} | "
-                    f"**• 매개변수:** {opt_str}\n\n"
-                    f"**• 상류 지점 (총 {len(unique_pts)}개)** 중 "
-                    f"최적화 완료: **{opt_cnt}개** (기본값: {unopt_cnt}개)"
-                )
-    else:
-        cat_counts = {"개선": 0, "부분개선": 0, "변화없음": 0, "재검토_1수위유량": 0, "재검토_2이상치": 0, "재검토_3본류": 0, "재검토_4조석": 0, "재검토_5댐보": 0, "재검토_기타": 0, "일반_최적화": 0, "일반_기본값": 0}
-
+                cat_counts["일반_기본값"] += 1
     # 범례 (옵션별로 항상 표시)
     if map_mode == "기본 (특보/일반 지점)":
         st.markdown(f"🔴 특보지점 ({sp_cnt}개)<br>⚫ 일반지점 ({gen_cnt}개)", unsafe_allow_html=True)
@@ -1244,23 +1271,19 @@ with col_map:
             base = WS_COLORS.get(ws, "#d1d5db")
             return {"fillColor": base, "color": "transparent", "weight": 0, "fillOpacity": 0.2}
         folium.GeoJson(
-            disp_basins.to_json(),
+            _gdf_to_geojson(disp_basins, f"basins:{selected_ws}"),
             style_function=style_fn,
             interactive=False
         ).add_to(m)
 
         # 선택 유역과 실제로 겹치는 시군구 폴리곤만 지도에 표시
         visible_admin = None
-        if show_admin_boundaries and admin_boundaries is not None and not admin_boundaries.empty:
-            if hasattr(disp_basins.geometry, "union_all"):
-                watershed_geom = disp_basins.geometry.union_all()
-            else:
-                watershed_geom = disp_basins.geometry.unary_union
-            visible_admin = admin_boundaries[
-                admin_boundaries.geometry.intersects(watershed_geom)
-            ].copy()
+        if show_admin_boundaries:
+            visible_admin, admin_labels = get_visible_admin_layers(
+                admin_boundaries, disp_basins, selected_ws
+            )
 
-            if not visible_admin.empty:
+            if visible_admin is not None and not visible_admin.empty:
                 selected_admin = st.session_state.get("selected_admin")
 
                 def admin_style(feature):
@@ -1301,7 +1324,7 @@ with col_map:
                         fields=["SGG_NM"], aliases=["행정구역:"]
                     )
                 folium.GeoJson(
-                    visible_admin.to_json(),
+                    _gdf_to_geojson(visible_admin, f"admin:{selected_ws}"),
                     style_function=admin_style,
                     highlight_function=admin_highlight,
                     name="행정구역 경계",
@@ -1309,11 +1332,6 @@ with col_map:
                 ).add_to(m)
 
                 # 각 행정구역 폴리곤 내부 대표 지점에 시·군·구명 표시
-                admin_labels = visible_admin[["SGG_NM", "geometry"]].to_crs(
-                    epsg=5179
-                )
-                admin_labels.geometry = admin_labels.geometry.representative_point()
-                admin_labels = admin_labels.to_crs(epsg=4326)
                 for _, admin_row in admin_labels.iterrows():
                     full_name = str(admin_row["SGG_NM"]).strip()
                     short_name = full_name.split()[-1]
@@ -1368,7 +1386,7 @@ with col_map:
         watershed_bound_gdf = get_watershed_boundary(disp_basins, selected_ws)
         if watershed_bound_gdf is not None and not watershed_bound_gdf.empty:
             folium.GeoJson(
-                watershed_bound_gdf.to_json(),
+                _gdf_to_geojson(watershed_bound_gdf, f"boundary:{selected_ws}"),
                 style_function=lambda x: {
                     "fillColor": "none",
                     "color": "#ff0000", # 빨간색 (전체 유역 경계)
@@ -1384,7 +1402,7 @@ with col_map:
             all_sp_bounds_gdf = get_all_special_boundaries(disp_basins, special_nodes, upstream_map, selected_ws)
             if all_sp_bounds_gdf is not None and not all_sp_bounds_gdf.empty:
                 folium.GeoJson(
-                    all_sp_bounds_gdf.to_json(),
+                    _gdf_to_geojson(all_sp_bounds_gdf, f"sp-bounds:{selected_ws}"),
                     style_function=lambda x: {
                         "fillColor": "none",
                         "color": "#ff0000", # 빨간색
@@ -1405,7 +1423,7 @@ with col_map:
             if not upstream_basins.empty:
                 # 선택된 상류 유역의 배경을 반투명 노란색으로 강조
                 folium.GeoJson(
-                    upstream_basins.to_json(),
+                    _gdf_to_geojson(upstream_basins, f"upstream:{selected_node}"),
                     style_function=lambda x: {
                         "fillColor": "#facc15",
                         "fillOpacity": 0.22,
@@ -1428,10 +1446,13 @@ with col_map:
                     merged_geom = merged_geom.buffer(-0.0015)
                 
                 merged_gdf = gpd.GeoDataFrame(geometry=[merged_geom], crs=disp_basins.crs)
+                merged_geojson = _gdf_to_geojson(
+                    merged_gdf, f"merged-upstream:{selected_node}"
+                )
 
                 # 넓고 투명한 외곽선 위에 밝은 선을 겹쳐 네온 halo 효과 생성
                 folium.GeoJson(
-                    merged_gdf.to_json(),
+                    merged_geojson,
                     style_function=lambda x: {
                         "fillColor": "none",
                         "color": "#f59e0b",
@@ -1442,7 +1463,7 @@ with col_map:
                     name="상류 유역 네온 외곽"
                 ).add_to(m)
                 folium.GeoJson(
-                    merged_gdf.to_json(),
+                    merged_geojson,
                     style_function=lambda x: {
                         "fillColor": "none",
                         "color": "#facc15",
@@ -1452,7 +1473,7 @@ with col_map:
                     interactive=False
                 ).add_to(m)
                 folium.GeoJson(
-                    merged_gdf.to_json(),
+                    merged_geojson,
                     style_function=lambda x: {
                         "fillColor": "none",
                         "color": "#fef9c3",
@@ -1463,10 +1484,10 @@ with col_map:
                     tooltip="상류 유역 전체 경계"
                 ).add_to(m)
 
-        for r_gdf in river_layers:
+        for river_index, r_gdf in enumerate(river_layers):
             if r_gdf is not None and not r_gdf.empty:
                 folium.GeoJson(
-                    r_gdf.to_json(),
+                    _gdf_to_geojson(r_gdf, f"river:{river_index}"),
                     style_function=lambda x: {"color": "#38bdf8", "weight": 1.0, "opacity": 0.5},
                     name="하천망"
                 ).add_to(m)
@@ -1495,11 +1516,25 @@ with col_map:
                 is_special = (pt_type == "특보")
                 
                 # 사전(Dictionary) 조회 최적화 (루프 내 1회만 조회)
-                is_opt = opt_dict.get(pt_id, False) if map_mode != "기본 (특보/일반 지점)" else False
+                is_opt = (
+                    opt_dict.get(pt_id, False)
+                    if map_mode in (
+                        "매개변수 최적화 수행결과",
+                        "카테고리별 분류 (성능비교)",
+                    )
+                    else False
+                )
                 cat = perf_dict.get(pt_name, "일반지점") if map_mode == "카테고리별 분류 (성능비교)" else None
                 note = reason_dict.get(pt_name, "") if map_mode == "카테고리별 분류 (성능비교)" else None
-                point_info = station_info.get(_normalize_station_name(pt_name), {})
-                grade_category = _station_grade_category(point_info.get("grade"))
+                if map_mode == "등급별 분류":
+                    point_info = station_info.get(
+                        _normalize_station_name(pt_name), {}
+                    )
+                    grade_category = _station_grade_category(
+                        point_info.get("grade")
+                    )
+                else:
+                    grade_category = "없음"
 
                 # Set default styles
                 bc, sz, wt, fc = "black", 3, 1, "black"

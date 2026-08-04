@@ -34,9 +34,15 @@
 
 - **interactive_map.py**: Streamlit 앱 메인 파일
 - **input/**: 유역 연결 및 관측소 입력 자료
-- **input/gis/**: 유역·지점·하천·행정구역 공간자료
+- **input/gis/**: 유역·지점·하천·행정구역 원본 공간자료
+- **input/gis/optimized/**: 지도 표출용으로 단순화한 경량 공간자료
+- **input/optimized/station_metadata.json**: 관측소 일람표를 변환한 경량 메타데이터
 - **requirements.txt**: Python 패키지 의존성
 - **packages.txt**: Streamlit Cloud용 Linux 시스템 패키지
+
+## 성능 최적화
+
+앱은 원본 자료를 보존하면서 **input/gis/optimized/**와 **input/optimized/**의 경량 자료를 우선 사용합니다. 경량 파일이 없으면 원본 SHP·GeoJSON·XLSX를 자동으로 읽어 동일한 결과를 생성합니다. 행정구역 공간 연산, GeoJSON 직렬화, 유역 흐름도 HTML은 Streamlit 캐시를 사용하며, 화면에서 숨겨진 분석 자료는 관련 모드가 활성화될 때만 불러옵니다.
 
 ## 로컬 실행
 
