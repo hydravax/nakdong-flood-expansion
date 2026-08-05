@@ -411,6 +411,25 @@ def _dms_to_decimal(value):
     return degrees + minutes / 60.0 + seconds / 3600.0
 
 
+def _admin_name_from_address(address):
+    """주소를 행정구역 SHP의 시군구 명칭 형식으로 정규화."""
+    parts = str(address or "").split()
+    if len(parts) < 2:
+        return "-"
+    province_aliases = {
+        "강원도": "강원특별자치도",
+        "전라북도": "전북특별자치도",
+        "경북": "경상북도",
+        "부산": "부산광역시",
+    }
+    parts[0] = province_aliases.get(parts[0], parts[0])
+    if parts[:2] == ["경상북도", "군위군"]:
+        return "대구광역시 군위군"
+    if len(parts) >= 3 and parts[1].endswith("시") and parts[2].endswith("구"):
+        return " ".join(parts[:3])
+    return " ".join(parts[:2])
+
+
 @st.cache_data
 def load_station_metadata():
     """수위·강수량 관측소 일람표에서 흐름도용 지점 정보를 로드."""
@@ -508,6 +527,7 @@ def build_station_points(station_info, map_points, display_basins, selected_ws):
             "watershed": info.get("watershed"),
             "river": info.get("river"),
             "address": info.get("address"),
+            "admin_name": info.get("admin_name") or _admin_name_from_address(info.get("address")),
             "longitude": float(longitude),
             "latitude": float(latitude),
         })
@@ -542,7 +562,7 @@ def build_station_points(station_info, map_points, display_basins, selected_ws):
 
 def build_station_status_table(points, station_info):
     """현재 선택 유역의 수위관측지점 현황을 표 형태로 구성."""
-    columns = ["지자체", "수위관측지점", "지점 구분", "대표하천", "주소"]
+    columns = ["행정구역", "수위관측지점", "지점 구분", "대표하천", "주소"]
     if points is None or points.empty:
         return pd.DataFrame(columns=columns)
 
@@ -555,10 +575,10 @@ def build_station_status_table(points, station_info):
             continue
 
         address = info.get("address")
-        address_parts = str(address).split() if address else []
-        municipality = " ".join(address_parts[:2]) if address_parts else "-"
+        admin_name = point.get("admin_name") or info.get("admin_name")
+        admin_name = admin_name or _admin_name_from_address(address)
         rows.append({
-            "지자체": municipality,
+            "행정구역": admin_name,
             "수위관측지점": station_name,
             "지점 구분": "특보지점" if point.get("pt_type") == "특보" else "일반지점",
             "대표하천": info.get("river") or "-",
@@ -569,7 +589,7 @@ def build_station_status_table(points, station_info):
         return pd.DataFrame(columns=columns)
     return (
         pd.DataFrame(rows, columns=columns)
-        .sort_values(["지자체", "수위관측지점"], kind="stable")
+        .sort_values(["행정구역", "수위관측지점"], kind="stable")
         .reset_index(drop=True)
     )
 
@@ -857,7 +877,8 @@ opt_dict, perf_dict, reason_dict = {}, {}, {}
 for _k, _v in [
     ("sp_box_key", "선택 없음"), ("out_box_key", "선택 없음"),
     ("search_query", ""), ("map_clicked_node", None),
-    ("_last_marker_click", None), ("selected_admin", None),
+    ("_last_marker_click", None), ("selected_admins", []),
+    ("show_admin_boundaries", False),
     ("_reset_widgets", False)
 ]:
     if _k not in st.session_state:
@@ -880,8 +901,8 @@ with col_side:
     ws_choices = ["전체", "낙동강", "낙동강동해", "태화강", "형산강", "회야수영강"]
 
     def cb_watershed():
-        st.session_state["selected_admin"] = None
-        st.session_state.pop("status_municipalities", None)
+        st.session_state["selected_admins"] = []
+        st.session_state.pop("status_admin_areas", None)
 
     selected_ws = st.selectbox(
         "유역 선택", ws_choices, index=1, on_change=cb_watershed
@@ -987,11 +1008,14 @@ with col_side:
         opt_dict = load_optimization_data()
         perf_dict, reason_dict = load_performance_data()
     show_all_sp_bounds = st.checkbox("특보지점 유역 경계", value=False)
-    show_admin_boundaries = st.checkbox("행정구역 경계", value=False)
+    show_admin_boundaries = st.checkbox(
+        "행정구역 경계", key="show_admin_boundaries"
+    )
     if show_admin_boundaries:
         admin_boundaries = load_admin_boundaries()
-    if show_admin_boundaries and st.session_state.get("selected_admin"):
-        st.caption(f"선택 행정구역: {st.session_state['selected_admin']}")
+    selected_admin_names = st.session_state.get("selected_admins", [])
+    if show_admin_boundaries and selected_admin_names:
+        st.caption(f"선택 행정구역: {', '.join(selected_admin_names)}")
     active_pts = disp_pts
     if selected_node and len(upstream_set) > 0 and disp_pts is not None:
         active_pts = disp_pts[disp_pts["desc"].isin(upstream_set)]
@@ -1408,11 +1432,13 @@ with col_map:
             )
 
             if visible_admin is not None and not visible_admin.empty:
-                selected_admin = st.session_state.get("selected_admin")
+                selected_admins = set(
+                    st.session_state.get("selected_admins", [])
+                )
 
                 def admin_style(feature):
                     is_selected = (
-                        feature["properties"].get("SGG_NM") == selected_admin
+                        feature["properties"].get("SGG_NM") in selected_admins
                     )
                     if is_selected:
                         return {
@@ -1433,7 +1459,7 @@ with col_map:
 
                 def admin_highlight(feature):
                     is_selected = (
-                        feature["properties"].get("SGG_NM") == selected_admin
+                        feature["properties"].get("SGG_NM") in selected_admins
                     )
                     return {
                         "fillColor": "#22c55e",
@@ -1445,7 +1471,13 @@ with col_map:
                 admin_tooltip = None
                 if "SGG_NM" in visible_admin.columns:
                     admin_tooltip = folium.GeoJsonTooltip(
-                        fields=["SGG_NM"], aliases=["행정구역:"]
+                        fields=["SGG_NM"],
+                        aliases=["행정구역:"],
+                        sticky=False,
+                        style=(
+                            "background:transparent;border:0;box-shadow:none;"
+                            "color:transparent;padding:0;"
+                        ),
                     )
                 folium.GeoJson(
                     _gdf_to_geojson(visible_admin, f"admin:{selected_ws}"),
@@ -1459,7 +1491,7 @@ with col_map:
                 for _, admin_row in admin_labels.iterrows():
                     full_name = str(admin_row["SGG_NM"]).strip()
                     short_name = full_name.split()[-1]
-                    is_selected = full_name == selected_admin
+                    is_selected = full_name in selected_admins
                     label_color = "#047857" if is_selected else "#15803d"
                     selected_text = "true" if is_selected else "false"
                     label_html = (
@@ -1840,7 +1872,8 @@ with col_map:
                         visible_admin["SGG_NM"].dropna().astype(str).str.strip()
                     )
                     if admin_name in valid_names:
-                        st.session_state["selected_admin"] = admin_name
+                        st.session_state["selected_admins"] = [admin_name]
+                        st.session_state["status_admin_areas"] = [admin_name]
 
         # 마커 또는 행정구역 폴리곤 클릭만 선택 이벤트로 처리한다.
         st_data = st_folium(
@@ -1931,18 +1964,32 @@ with col_graph:
 st.divider()
 st.subheader("특보지점 현황")
 station_status_df = build_station_status_table(station_points, station_info)
-municipality_options = sorted(station_status_df["지자체"].unique().tolist())
-selected_municipalities = st.multiselect(
-    "지자체 선택",
-    municipality_options,
-    key="status_municipalities",
-    placeholder="선택하지 않으면 전체 지자체를 표시합니다.",
+admin_area_options = sorted(
+    set(station_status_df["행정구역"].unique().tolist())
+    | set(st.session_state.get("selected_admins", []))
+)
+
+
+def sync_admin_selection_from_table():
+    selected_names = list(st.session_state.get("status_admin_areas", []))
+    st.session_state["selected_admins"] = selected_names
+
+    if selected_names:
+        st.session_state["show_admin_boundaries"] = True
+
+
+selected_admin_areas = st.multiselect(
+    "행정구역 선택",
+    admin_area_options,
+    key="status_admin_areas",
+    placeholder="선택하지 않으면 전체 행정구역을 표시합니다.",
+    on_change=sync_admin_selection_from_table,
 )
 filtered_station_status_df = (
     station_status_df[
-        station_status_df["지자체"].isin(selected_municipalities)
+        station_status_df["행정구역"].isin(selected_admin_areas)
     ].reset_index(drop=True)
-    if selected_municipalities
+    if selected_admin_areas
     else station_status_df
 )
 st.caption(
@@ -1956,7 +2003,7 @@ st.dataframe(
     use_container_width=True,
     height=460,
     column_config={
-        "지자체": st.column_config.TextColumn(width="medium"),
+        "행정구역": st.column_config.TextColumn(width="medium"),
         "수위관측지점": st.column_config.TextColumn(width="medium"),
         "지점 구분": st.column_config.TextColumn(width="small"),
         "대표하천": st.column_config.TextColumn(width="small"),
