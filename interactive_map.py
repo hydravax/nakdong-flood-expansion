@@ -427,6 +427,7 @@ def load_station_metadata():
                     "station_type": "수위",
                     "watershed": _clean_station_value(row.iloc[4] if len(row) > 4 else None),
                     "river": _clean_station_value(row.iloc[5] if len(row) > 5 else None),
+                    "address": _clean_station_value(row.iloc[8] if len(row) > 8 else None),
                     "drainage_area": row.iloc[19] if len(row) > 19 and pd.notna(row.iloc[19]) else None,
                     "grade": _clean_station_value(row.iloc[21] if len(row) > 21 else None),
                 }
@@ -447,6 +448,7 @@ def load_station_metadata():
                     "station_type": "강수량",
                     "watershed": _clean_station_value(row.iloc[4] if len(row) > 4 else None),
                     "river": None,
+                    "address": _clean_station_value(row.iloc[7] if len(row) > 7 else None),
                     "drainage_area": None,
                     "grade": _clean_station_value(row.iloc[12] if len(row) > 12 else None),
                 }
@@ -458,6 +460,39 @@ def load_station_metadata():
             st.error(f"강수량관측소 정보 로드 오류: {e}")
 
     return station_info
+
+
+def build_station_status_table(points, station_info):
+    """현재 선택 유역의 수위관측지점 현황을 표 형태로 구성."""
+    columns = ["지자체", "수위관측지점", "지점 구분", "대표하천", "주소"]
+    if points is None or points.empty:
+        return pd.DataFrame(columns=columns)
+
+    rows = []
+    for _, point in points.drop_duplicates(subset=["desc"]).iterrows():
+        station_name = str(point.get("Name", "")).strip()
+        info = station_info.get(_normalize_station_name(station_name), {})
+        if info.get("station_type") != "수위":
+            continue
+
+        address = info.get("address")
+        address_parts = str(address).split() if address else []
+        municipality = " ".join(address_parts[:2]) if address_parts else "-"
+        rows.append({
+            "지자체": municipality,
+            "수위관측지점": station_name,
+            "지점 구분": "특보지점" if point.get("pt_type") == "특보" else "일반지점",
+            "대표하천": info.get("river") or "-",
+            "주소": address or "-",
+        })
+
+    if not rows:
+        return pd.DataFrame(columns=columns)
+    return (
+        pd.DataFrame(rows, columns=columns)
+        .sort_values(["지자체", "수위관측지점"], kind="stable")
+        .reset_index(drop=True)
+    )
 
 
 def _format_drainage_area(value):
@@ -1793,3 +1828,27 @@ with col_graph:
             components.html(html_str, height=1000, scrolling=False)
     elif selected_node:
         st.info("선택하신 지점은 최상단 지점입니다.")
+
+# ══════════════════════════════════════════
+#  특보지점 현황
+# ══════════════════════════════════════════
+st.divider()
+st.subheader("특보지점 현황")
+station_status_df = build_station_status_table(disp_pts, station_info)
+st.caption(
+    f"{selected_ws} 기준 수위관측지점 {len(station_status_df):,}개 · "
+    "수위관측소 일람표와 지도 지점명이 일치한 지점"
+)
+st.dataframe(
+    station_status_df,
+    hide_index=True,
+    use_container_width=True,
+    height=460,
+    column_config={
+        "지자체": st.column_config.TextColumn(width="medium"),
+        "수위관측지점": st.column_config.TextColumn(width="medium"),
+        "지점 구분": st.column_config.TextColumn(width="small"),
+        "대표하천": st.column_config.TextColumn(width="small"),
+        "주소": st.column_config.TextColumn(width="large"),
+    },
+)
