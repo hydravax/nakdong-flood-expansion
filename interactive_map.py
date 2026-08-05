@@ -881,6 +881,7 @@ with col_side:
 
     def cb_watershed():
         st.session_state["selected_admin"] = None
+        st.session_state.pop("status_municipalities", None)
 
     selected_ws = st.selectbox(
         "유역 선택", ws_choices, index=1, on_change=cb_watershed
@@ -1930,12 +1931,27 @@ with col_graph:
 st.divider()
 st.subheader("특보지점 현황")
 station_status_df = build_station_status_table(station_points, station_info)
+municipality_options = sorted(station_status_df["지자체"].unique().tolist())
+selected_municipalities = st.multiselect(
+    "지자체 선택",
+    municipality_options,
+    key="status_municipalities",
+    placeholder="선택하지 않으면 전체 지자체를 표시합니다.",
+)
+filtered_station_status_df = (
+    station_status_df[
+        station_status_df["지자체"].isin(selected_municipalities)
+    ].reset_index(drop=True)
+    if selected_municipalities
+    else station_status_df
+)
 st.caption(
-    f"{selected_ws} 기준 수위관측지점 {len(station_status_df):,}개 · "
+    f"{selected_ws} 기준 전체 {len(station_status_df):,}개 · "
+    f"현재 표시 {len(filtered_station_status_df):,}개 · "
     "수위관측소 일람표 기준"
 )
 st.dataframe(
-    station_status_df,
+    filtered_station_status_df,
     hide_index=True,
     use_container_width=True,
     height=460,
