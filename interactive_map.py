@@ -261,7 +261,8 @@ def _count_station_grades(points, station_info):
     counts = {grade: 0 for grade in GRADE_COLORS}
     if points is None or points.empty:
         return counts
-    unique_points = points.drop_duplicates(subset=["desc"])
+    unique_key = "station_code" if "station_code" in points.columns else "desc"
+    unique_points = points.drop_duplicates(subset=[unique_key])
     for point_name in unique_points["Name"]:
         point_info = station_info.get(_normalize_station_name(point_name), {})
         grade_category = _station_grade_category(point_info.get("grade"))
@@ -399,6 +400,17 @@ def _clean_station_value(value):
     return str(value).strip()
 
 
+def _dms_to_decimal(value):
+    """도-분-초 형식 좌표를 십진수 좌표로 변환."""
+    if value is None or pd.isna(value):
+        return None
+    numbers = re.findall(r"\d+(?:\.\d+)?", str(value))
+    if len(numbers) < 3:
+        return None
+    degrees, minutes, seconds = map(float, numbers[:3])
+    return degrees + minutes / 60.0 + seconds / 3600.0
+
+
 @st.cache_data
 def load_station_metadata():
     """수위·강수량 관측소 일람표에서 흐름도용 지점 정보를 로드."""
@@ -425,9 +437,12 @@ def load_station_metadata():
                     continue
                 station_info[_normalize_station_name(name)] = {
                     "station_type": "수위",
+                    "station_code": _clean_station_value(row.iloc[1] if len(row) > 1 else None),
                     "watershed": _clean_station_value(row.iloc[4] if len(row) > 4 else None),
                     "river": _clean_station_value(row.iloc[5] if len(row) > 5 else None),
                     "address": _clean_station_value(row.iloc[8] if len(row) > 8 else None),
+                    "longitude": _dms_to_decimal(row.iloc[9] if len(row) > 9 else None),
+                    "latitude": _dms_to_decimal(row.iloc[11] if len(row) > 11 else None),
                     "drainage_area": row.iloc[19] if len(row) > 19 and pd.notna(row.iloc[19]) else None,
                     "grade": _clean_station_value(row.iloc[21] if len(row) > 21 else None),
                 }
@@ -462,6 +477,69 @@ def load_station_metadata():
     return station_info
 
 
+def build_station_points(station_info, map_points, display_basins, selected_ws):
+    """수위관측소 일람표 전체를 지도 표출용 점 자료로 변환."""
+    map_lookup = {}
+    if map_points is not None and not map_points.empty:
+        candidates = map_points.drop_duplicates(subset=["desc"]).copy()
+        candidates["_special_priority"] = candidates["pt_type"] == "특보"
+        for _, point in candidates.sort_values("_special_priority").iterrows():
+            map_lookup[_normalize_station_name(point.get("Name", ""))] = {
+                "desc": str(point.get("desc", "")).strip(),
+                "pt_type": point.get("pt_type", "유역출구"),
+            }
+
+    records = []
+    for normalized_name, info in station_info.items():
+        if info.get("station_type") != "수위":
+            continue
+        longitude = info.get("longitude")
+        latitude = info.get("latitude")
+        if longitude is None or latitude is None:
+            continue
+        matched_point = map_lookup.get(normalized_name)
+        station_code = str(info.get("station_code") or normalized_name).strip()
+        records.append({
+            "Name": normalized_name,
+            "desc": matched_point["desc"] if matched_point else f"OBS_{station_code}",
+            "pt_type": matched_point["pt_type"] if matched_point else "수위관측소",
+            "station_code": station_code,
+            "grade": info.get("grade"),
+            "watershed": info.get("watershed"),
+            "river": info.get("river"),
+            "address": info.get("address"),
+            "longitude": float(longitude),
+            "latitude": float(latitude),
+        })
+
+    if not records:
+        return gpd.GeoDataFrame(
+            columns=["Name", "desc", "pt_type", "grade", "geometry"],
+            geometry="geometry", crs="EPSG:4326"
+        )
+
+    stations = gpd.GeoDataFrame(
+        records,
+        geometry=gpd.points_from_xy(
+            [record["longitude"] for record in records],
+            [record["latitude"] for record in records],
+        ),
+        crs="EPSG:4326",
+    )
+    if (
+        selected_ws != "전체"
+        and display_basins is not None
+        and not display_basins.empty
+    ):
+        watershed_geometry = (
+            display_basins.geometry.union_all()
+            if hasattr(display_basins.geometry, "union_all")
+            else display_basins.geometry.unary_union
+        )
+        stations = stations[stations.geometry.intersects(watershed_geometry)].copy()
+    return stations.reset_index(drop=True)
+
+
 def build_station_status_table(points, station_info):
     """현재 선택 유역의 수위관측지점 현황을 표 형태로 구성."""
     columns = ["지자체", "수위관측지점", "지점 구분", "대표하천", "주소"]
@@ -469,7 +547,8 @@ def build_station_status_table(points, station_info):
         return pd.DataFrame(columns=columns)
 
     rows = []
-    for _, point in points.drop_duplicates(subset=["desc"]).iterrows():
+    unique_key = "station_code" if "station_code" in points.columns else "desc"
+    for _, point in points.drop_duplicates(subset=[unique_key]).iterrows():
         station_name = str(point.get("Name", "")).strip()
         info = station_info.get(_normalize_station_name(station_name), {})
         if info.get("station_type") != "수위":
@@ -923,8 +1002,11 @@ with col_side:
     else:
         unique_pts = []
 
+    station_points = build_station_points(
+        station_info, gdf_all_pts, disp_basins, selected_ws
+    )
     map_grade_counts = (
-        _count_station_grades(disp_pts, station_info)
+        _count_station_grades(station_points, station_info)
         if map_mode == "등급별 분류"
         else {grade: 0 for grade in GRADE_COLORS}
     )
@@ -987,6 +1069,7 @@ with col_side:
         st.markdown(f"🔴 특보지점 ({sp_cnt}개)<br>⚫ 일반지점 ({gen_cnt}개)", unsafe_allow_html=True)
     elif map_mode == "등급별 분류":
         st.markdown(
+            f"**전체 ({sum(map_grade_counts.values())}개)**<br>"
             f"<span style='color:{GRADE_COLORS['최적(A)']}'>●</span> "
             f"최적(A) ({map_grade_counts['최적(A)']}개)<br>"
             f"<span style='color:{GRADE_COLORS['우수(B)']}'>●</span> "
@@ -1034,7 +1117,12 @@ with col_map:
     st.subheader("대상 유역")
     if disp_basins is not None and not disp_basins.empty:
         fly_to = st.session_state.pop("fly_to_target", None)
-        bounds = disp_basins.total_bounds
+        bounds_source = (
+            station_points
+            if map_mode == "등급별 분류" and not station_points.empty
+            else disp_basins
+        )
+        bounds = bounds_source.total_bounds
         default_center = [(bounds[1] + bounds[3]) / 2, (bounds[0] + bounds[2]) / 2]
         center = fly_to["center"] if fly_to else st.session_state.get("map_center", default_center)
         zoom = fly_to["zoom"] if fly_to else st.session_state.get(
@@ -1527,8 +1615,14 @@ with col_map:
                     name="하천망"
                 ).add_to(m)
 
-        if disp_pts is not None and not disp_pts.empty:
-            pts_to_render = disp_pts.drop_duplicates(subset=["desc"]).copy()
+        points_for_map = station_points if map_mode == "등급별 분류" else disp_pts
+        if points_for_map is not None and not points_for_map.empty:
+            unique_key = (
+                "station_code"
+                if "station_code" in points_for_map.columns
+                else "desc"
+            )
+            pts_to_render = points_for_map.drop_duplicates(subset=[unique_key]).copy()
             if "pt_type" not in pts_to_render.columns:
                 pts_to_render["pt_type"] = "지점"
             pts_to_render["_is_sp"] = pts_to_render["pt_type"] == "특보"
@@ -1543,6 +1637,7 @@ with col_map:
             rendered_node_coords = {
                 str(pt_id).strip(): (float(lat), float(lng))
                 for pt_id, lat, lng in zip(pt_ids, lats, lngs)
+                if not str(pt_id).strip().startswith("OBS_")
             }
 
             for pt_id, pt_name, pt_type, lat, lng in zip(pt_ids, pt_names, pt_types, lats, lngs):
@@ -1834,10 +1929,10 @@ with col_graph:
 # ══════════════════════════════════════════
 st.divider()
 st.subheader("특보지점 현황")
-station_status_df = build_station_status_table(disp_pts, station_info)
+station_status_df = build_station_status_table(station_points, station_info)
 st.caption(
     f"{selected_ws} 기준 수위관측지점 {len(station_status_df):,}개 · "
-    "수위관측소 일람표와 지도 지점명이 일치한 지점"
+    "수위관측소 일람표 기준"
 )
 st.dataframe(
     station_status_df,
