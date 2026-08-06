@@ -1432,6 +1432,17 @@ with col_map:
             )
 
             if visible_admin is not None and not visible_admin.empty:
+                m.get_root().header.add_child(folium.Element("""
+                <style>
+                .admin-boundary-path:focus,
+                .admin-boundary-path:focus-visible {
+                    outline: none !important;
+                }
+                .admin-boundary-tooltip {
+                    display: none !important;
+                }
+                </style>
+                """))
                 selected_admins = set(
                     st.session_state.get("selected_admins", [])
                 )
@@ -1448,6 +1459,7 @@ with col_map:
                             "weight": 4,
                             "opacity": 1.0,
                             "dashArray": "",
+                            "className": "admin-boundary-path",
                         }
                     return {
                         "fillOpacity": 0,
@@ -1455,6 +1467,7 @@ with col_map:
                         "weight": 1.2,
                         "opacity": 0.95,
                         "dashArray": "5, 4",
+                        "className": "admin-boundary-path",
                     }
 
                 def admin_highlight(feature):
@@ -1473,6 +1486,7 @@ with col_map:
                     admin_tooltip = folium.GeoJsonTooltip(
                         fields=["SGG_NM"],
                         aliases=["행정구역:"],
+                        class_name="admin-boundary-tooltip",
                         sticky=False,
                         style=(
                             "background:transparent;border:0;box-shadow:none;"
@@ -1486,6 +1500,34 @@ with col_map:
                     name="행정구역 경계",
                     tooltip=admin_tooltip,
                 ).add_to(m)
+
+                admin_focus_cleanup = MacroElement()
+                admin_focus_cleanup._template = Template("""
+                    {% macro script(this, kwargs) %}
+                    (function() {
+                        var adminMap = {{ this._parent.get_name() }};
+                        function disableAdminPathFocusBoxes() {
+                            var paths = adminMap.getContainer()
+                                .querySelectorAll('.admin-boundary-path');
+                            paths.forEach(function(path) {
+                                path.style.outline = 'none';
+                                path.removeAttribute('tabindex');
+                                path.addEventListener('mousedown', function(e) {
+                                    e.preventDefault();
+                                });
+                                path.addEventListener('focus', function() {
+                                    if (typeof path.blur === 'function') {
+                                        path.blur();
+                                    }
+                                });
+                            });
+                        }
+                        setTimeout(disableAdminPathFocusBoxes, 0);
+                        adminMap.on('zoomend moveend', disableAdminPathFocusBoxes);
+                    })();
+                    {% endmacro %}
+                """)
+                m.add_child(admin_focus_cleanup)
 
                 # 각 행정구역 폴리곤 내부 대표 지점에 시·군·구명 표시
                 for _, admin_row in admin_labels.iterrows():
