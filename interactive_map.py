@@ -1506,7 +1506,11 @@ with col_map:
                     )
                     folium.Marker(
                         [admin_row.geometry.y, admin_row.geometry.x],
-                        icon=folium.DivIcon(html=label_html),
+                        icon=folium.DivIcon(
+                            html=label_html,
+                            class_name="admin-label-icon",
+                        ),
+                        keyboard=False,
                         interactive=False,
                     ).add_to(m)
 
@@ -1523,6 +1527,14 @@ with col_map:
                             );
                             var labels = labelMap.getContainer()
                                 .querySelectorAll('.admin-area-label');
+                            var labelIcons = labelMap.getContainer()
+                                .querySelectorAll('.admin-label-icon');
+                            labelIcons.forEach(function(icon) {
+                                icon.style.pointerEvents = 'none';
+                                icon.removeAttribute('tabindex');
+                                icon.removeAttribute('role');
+                                icon.setAttribute('aria-hidden', 'true');
+                            });
                             labels.forEach(function(label) {
                                 var selectedBonus =
                                     label.getAttribute('data-selected') === 'true'
