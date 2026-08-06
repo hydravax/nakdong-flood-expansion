@@ -2,6 +2,10 @@
 
 낙동강권역 5개 유역(낙동강, 낙동강동해, 태화강, 형산강, 회야수영강)의 상·하류 연결 관계와 홍수특보 대상 지점을 지도와 유역 흐름도로 탐색하는 Streamlit 애플리케이션입니다.
 
+## 바로 실행
+
+[🌐 Streamlit 앱 열기](https://nakdong-flood-expansion-equdycu48r63xjh5yp4qks.streamlit.app/)
+
 ## 주요 기능
 
 - 유역별 또는 전체 권역 지도 조회
