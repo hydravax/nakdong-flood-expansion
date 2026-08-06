@@ -981,7 +981,13 @@ with col_side:
 
     if selected_node:
         upstream_set = get_all_upstream(selected_node, upstream_map)
-        nm = node_metadata.get(selected_node, selected_node)
+        table_selected_name = st.session_state.get("_status_station_display_name")
+        table_selected_node = st.session_state.get("_status_station_node")
+        nm = (
+            table_selected_name
+            if table_selected_name and table_selected_node == selected_node
+            else node_metadata.get(selected_node, selected_node)
+        )
         st.success(f"**{nm}** 위로 {len(upstream_set)}개 유역 연결됨")
         # 드롭다운/검색 선택 시 지도 Fly-To
         if not st.session_state.map_clicked_node and gdf_all_pts is not None:
@@ -1703,6 +1709,36 @@ with col_map:
                 ).add_to(m)
 
         points_for_map = station_points if map_mode == "등급별 분류" else disp_pts
+        # 표에서 선택한 관측소가 기존 유역 지점과 매칭되지 않아도
+        # 기본 지도에서 선택 마커와 위치 이동이 보이도록 해당 점을 추가한다.
+        if selected_node and station_points is not None and not station_points.empty:
+            selected_station_points = station_points[
+                station_points["desc"].astype(str).str.strip()
+                == str(selected_node).strip()
+            ]
+            existing_point_ids = (
+                set(points_for_map["desc"].astype(str).str.strip())
+                if points_for_map is not None
+                and not points_for_map.empty
+                and "desc" in points_for_map.columns
+                else set()
+            )
+            if (
+                not selected_station_points.empty
+                and str(selected_node).strip() not in existing_point_ids
+            ):
+                if points_for_map is None or points_for_map.empty:
+                    points_for_map = selected_station_points.copy()
+                else:
+                    points_for_map = gpd.GeoDataFrame(
+                        pd.concat(
+                            [points_for_map, selected_station_points],
+                            ignore_index=True,
+                            sort=False,
+                        ),
+                        geometry="geometry",
+                        crs=points_for_map.crs or station_points.crs,
+                    )
         if points_for_map is not None and not points_for_map.empty:
             unique_key = (
                 "station_code"
@@ -1724,7 +1760,6 @@ with col_map:
             rendered_node_coords = {
                 str(pt_id).strip(): (float(lat), float(lng))
                 for pt_id, lat, lng in zip(pt_ids, lats, lngs)
-                if not str(pt_id).strip().startswith("OBS_")
             }
 
             for pt_id, pt_name, pt_type, lat, lng in zip(pt_ids, pt_names, pt_types, lats, lngs):
@@ -1999,12 +2034,23 @@ with col_side:
 # ══════════════════════════════════════════
 #  유역 흐름도
 # ══════════════════════════════════════════
+flowchart_node_metadata = node_metadata
+if (
+    selected_node
+    and st.session_state.get("_status_station_node") == selected_node
+    and st.session_state.get("_status_station_display_name")
+):
+    flowchart_node_metadata = dict(node_metadata)
+    flowchart_node_metadata[selected_node] = st.session_state[
+        "_status_station_display_name"
+    ]
+
 with col_graph:
     st.subheader("유역 흐름도")
     if selected_node and len(upstream_set) > 0:
         html_str = draw_network_flowchart(
             selected_node, frozenset(upstream_set),
-            upstream_map, node_metadata, frozenset(special_nodes),
+            upstream_map, flowchart_node_metadata, frozenset(special_nodes),
             map_mode, opt_dict, perf_dict, station_info
         )
         if html_str:
@@ -2051,11 +2097,14 @@ st.caption(
     f"현재 표시 {len(filtered_station_status_df):,}개 · "
     "수위관측소 일람표 기준"
 )
-st.dataframe(
+station_table_event = st.dataframe(
     filtered_station_status_df,
     hide_index=True,
     use_container_width=True,
     height=460,
+    key="station_status_table",
+    on_select="rerun",
+    selection_mode="single-cell",
     column_config={
         "행정구역": st.column_config.TextColumn(width="medium"),
         "수위관측지점": st.column_config.TextColumn(width="medium"),
@@ -2064,3 +2113,53 @@ st.dataframe(
         "주소": st.column_config.TextColumn(width="large"),
     },
 )
+
+selected_status_cells = list(station_table_event.selection.cells)
+if selected_status_cells:
+    selected_status_index, selected_status_column = selected_status_cells[0]
+    selected_status_index = int(selected_status_index)
+    if (
+        selected_status_column == "수위관측지점"
+        and 0 <= selected_status_index < len(filtered_station_status_df)
+    ):
+        selected_status_row = filtered_station_status_df.iloc[selected_status_index]
+        selected_station_name = _normalize_station_name(
+            selected_status_row["수위관측지점"]
+        )
+        matching_station_points = station_points[
+            station_points["Name"].map(_normalize_station_name)
+            == selected_station_name
+        ]
+        if not matching_station_points.empty:
+            selected_station_point = matching_station_points.iloc[0]
+            selected_station_node = str(selected_station_point["desc"]).strip()
+            selected_station_code = str(
+                selected_station_point.get("station_code", "")
+            ).strip()
+            table_selection_signature = (
+                selected_ws,
+                selected_station_code,
+                selected_station_node,
+            )
+            if table_selection_signature != st.session_state.get(
+                "_last_status_station_selection"
+            ):
+                station_lat = float(selected_station_point.geometry.y)
+                station_lng = float(selected_station_point.geometry.x)
+                st.session_state["_last_status_station_selection"] = (
+                    table_selection_signature
+                )
+                st.session_state["_status_station_node"] = selected_station_node
+                st.session_state["_status_station_display_name"] = str(
+                    selected_status_row["수위관측지점"]
+                ).strip()
+                st.session_state["map_clicked_node"] = selected_station_node
+                st.session_state["_last_marker_click"] = None
+                st.session_state["_reset_widgets"] = True
+                st.session_state["map_center"] = [station_lat, station_lng]
+                st.session_state["map_zoom"] = 12
+                st.session_state["fly_to_target"] = {
+                    "center": [station_lat, station_lng],
+                    "zoom": 12,
+                }
+                st.rerun()
